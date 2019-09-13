@@ -11,7 +11,7 @@ module Tools
     !TYPE QUE EMPACOTA UMA MATRIZ NO ESQUEMA COORDENADAS
     type PackedMatrixEntry
         integer :: NNZ
-        integer, allocatable :: IRN(:), JCN(:)
+        integer, allocatable :: RowIndex(:), ColIndex(:)
         real, allocatable :: Value(:)
     end type PackedMatrixEntry
     
