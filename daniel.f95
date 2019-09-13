@@ -1,4 +1,4 @@
-program daniel
+module daniel
     !TYPE QUE EMPACOTA UM VETOR ESPARSO
     type PackedVector
         integer :: nz, NFull
@@ -105,4 +105,4 @@ program daniel
             A%col_start(i+1) = A%len_col(i)+A%col_start(i)
 		enddo
     end subroutine col_permutation
-end program
+end module
