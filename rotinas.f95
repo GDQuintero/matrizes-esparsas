@@ -1,4 +1,4 @@
-Module Tools
+module Tools
     implicit none
     
     !TYPE QUE EMPACOTA UM VETOR ESPARSO
@@ -27,5 +27,4 @@ Module Tools
         real, allocatable :: Value(:)
     end type PackedMatrixRow
     
-    
-end Module Tools
+end module Tools
