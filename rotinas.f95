@@ -1,3 +1,3 @@
-Module Tools
+module Tools
     implicit none
-end Module Tools
+end module Tools
