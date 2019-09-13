@@ -9,23 +9,23 @@ module Tools
     end type PackedVector
     
     !TYPE QUE EMPACOTA UMA MATRIZ NO ESQUEMA COORDENADAS
-    type PackedMatrixEntry
+    type EntryPacked
         integer :: NNZ
         integer, allocatable :: Row_Index(:), Col_Index(:)
         real, allocatable :: Value(:)
-    end type PackedMatrixEntry
+    end type 
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE COLUNAS
-    type PackedMatrixCol
+    type ColPacked
         integer, allocatable :: Len_Col(:), Col_Start(:), Row_Index(:)
         real, allocatable :: Value(:)
-    end type PackedMatrixCol
+    end type 
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE LINHAS
-    type PackedMatrixRow
+    type RowPacked
         integer, allocatable :: Len_Row(:), Row_Start(:), Col_Index(:)
         real, allocatable :: Value(:)
-    end type PackedMatrixRow
+    end type 
     
     contains
     
