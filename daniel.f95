@@ -7,31 +7,32 @@ program daniel
     end type PackedVector
     
     !TYPE QUE EMPACOTA UMA MATRIZ NO ESQUEMA COORDENADAS
-    type PackedMatrixEntry
+    type EntryPacked
         integer :: NNZ
         integer, allocatable :: Row_Index(:), Col_Index(:)
         real, allocatable :: Value(:)
-    end type PackedMatrixEntry
+    end type 
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE COLUNAS
-    type PackedMatrixCol
+    type ColPacked
         integer, allocatable :: Len_Col(:), Col_Start(:), Row_Index(:)
         real, allocatable :: Value(:)
-    end type PackedMatrixCol
+    end type 
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE LINHAS
-    type PackedMatrixRow
+    type RowPacked
         integer, allocatable :: Len_Row(:), Row_Start(:), Col_Index(:)
         real, allocatable :: Value(:)
-    end type PackedMatrixRow
+    end type 
     
     contains
+    
 !================================================================================================
 !     PERMUTA DUAS COLUNAS DUMA MATRIZ EMPACOTADA, J1 É MENOR DO QUE J2
 !================================================================================================
     subroutine col_permutation(A,j1,j2)! supposed that j1 < j2
         implicit none
-        type(col_packed) :: A
+        type(ColPacked) :: A
         integer :: j1, j2, i, m, i_aux
         integer, allocatable :: inter(:)
         real, allocatable :: array(:)
