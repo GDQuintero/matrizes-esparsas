@@ -4,7 +4,7 @@ module daniel
     contains
     
 !================================================================================================
-!     PERMUTA DUAS COLUNAS DUMA MATRIZ EMPACOTADA, J1 É MENOR DO QUE J2
+!     PERMUTA DUAS COLUNAS DUMA MATRIZ EMPACOTADA POR COLUNAS, J1 É MENOR DO QUE J2
 !================================================================================================
     subroutine col_permutation(A,j1,j2)! supposed that j1 < j2
         implicit none
@@ -81,4 +81,20 @@ module daniel
             A%col_start(i+1) = A%len_col(i)+A%col_start(i)
 		enddo
     end subroutine col_permutation
+!================================================================================================
+!     PERMUTA DUAS LINHAS DUMA MATRIZ EMPACOTADA POR COLUNAS, I1 É MENOR DO QUE I2
+!================================================================================================    
+    subroutine row_permutation(A, i1, i2)
+        implicit none
+        type(col_packed) :: A
+        integer :: i1, i2, i
+        do i = 1, size(A%value)
+            if(A%row_index(i) == i1) then
+                A%row_index(i) = i2
+            elseif(A%row_index(i) == i2) then
+                A%row_index(i) = i1
+            endif
+        enddo
+    end subroutine
+
 end module
