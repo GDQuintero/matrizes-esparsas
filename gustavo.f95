@@ -1,4 +1,6 @@
 module gustavo
+
+    use daniel
     !TYPE QUE EMPACOTA UM VETOR ESPARSO
     type PackedVector
         integer :: nz, NFull
