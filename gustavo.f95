@@ -1,6 +1,6 @@
 module gustavo
-
-!     use daniel
+    use daniel
+    
     !TYPE QUE EMPACOTA UM VETOR ESPARSO
     type PackedVector
         integer :: nz, NFull
@@ -97,7 +97,8 @@ module gustavo
         real :: FullMatrix(:,:)
         type(RowPacked) :: GatherRow
         
-        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*0.5)+1; NonZero = 0; k = 0
+        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:))
+        Density = int(m*n*0.5)+1; NonZero = 0; k = 0
         allocate(GatherRow%Len_Row(n),GatherRow%Row_Start(n))
         allocate(GatherRow%Col_Index(Density),GatherRow%Value(Density))
         
@@ -185,4 +186,17 @@ module gustavo
         RowSumColPacked = A
     end function RowSumColPacked
     
+    !================================================================================================
+    ! CRITERIO DE GRADO MINIMO
+    !================================================================================================
+    subroutine MinDeg(A)
+        implicit none
+        
+        integer :: i, j
+        real, allocatable :: aux(:)
+        type(RowPacked) :: A
+        
+        
+        
+    end subroutine MinDeg
 end module
