@@ -6,7 +6,7 @@ module gustavo
         integer :: nz, NFull
         real, allocatable :: Value(:)
         integer, allocatable :: Vector_Index(:)
-    end type PackedVector
+    end type 
     
     !TYPE QUE EMPACOTA UMA MATRIZ NO ESQUEMA COORDENADAS
     type EntryPacked
@@ -27,6 +27,10 @@ module gustavo
         real, allocatable :: Value(:)
     end type 
     
+    type Pivot
+        integer :: Linha, Coluna
+        real :: Value
+    end type
     contains
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UM VETOR ESPARSO 
