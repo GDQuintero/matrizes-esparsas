@@ -207,18 +207,18 @@ module gustavo
                 j = j + 1
             endif
         enddo
-        print*, j
-        allocate(ind(2)); j = 0
+
+        allocate(ind(j))
         
-!         do i = 1, n
-!             j = j + 1
-!             if (A%Len_Row(i) .eq. rk) then
-!                 k = k + 1
+        do i = 1, n
+            j = j + 1
+            if (A%Len_Row(i) .eq. rk) then
+                k = k + 1
 !                 ind(k) = j
-!             endif
-!         enddo
+            endif
+        enddo
         
-!         print*, ind
+        print*, ind
         
     end function MinDeg
 end module

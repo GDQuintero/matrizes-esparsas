@@ -111,6 +111,6 @@ module daniel
 ! 		allocate(r_aux(size(A%len_col)))
 ! 		row_aux = 0
 ! 		do i = 1, size(A%value)
-	end function
+! 	end function
 
 end module
