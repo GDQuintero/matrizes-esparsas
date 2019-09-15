@@ -201,25 +201,25 @@ module gustavo
         type(RowPacked) :: A
         type(Pivot) :: MinDeg        
         
-!         rk = minval(A%Len_Row); n = size(A%Len_Row); j = 0; k = 0
-!         
-!         do i = 1, n
-!             if (A%Len_Row(i) .eq. rk) then
-!                 j = j + 1
-!             endif
-!         enddo
+        rk = minval(A%Len_Row); n = size(A%Len_Row); j = 0; k = 0
+        
+        do i = 1, n
+            if (A%Len_Row(i) .eq. rk) then
+                j = j + 1
+            endif
+        enddo
 
-!         allocate(ind(2))
+        allocate(ind(j))
         
-!         do i = 1, n
-!             j = j + 1
-!             if (A%Len_Row(i) .eq. rk) then
-!                 k = k + 1
+        do i = 1, n
+            j = j + 1
+            if (A%Len_Row(i) .eq. rk) then
+                k = k + 1
 !                 ind(k) = j
-!             endif
-!         enddo
+            endif
+        enddo
         
-!         print*, ind
+        print*, ind
         
     end function MinDeg
 end module
