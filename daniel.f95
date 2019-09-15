@@ -78,7 +78,7 @@ module daniel
 		A%len_col(j2) = A%len_col(j1)
 		A%len_col(j1) = i_aux
 		
-		do i = 1, size(A%len_col)
+		do i = 1, size(A%len_col)!pode-se melhorar este ciclo do, nao precisa percorrer o vetor len_col tudo
             A%col_start(i+1) = A%len_col(i)+A%col_start(i)
 		enddo
     end subroutine col_permutation
@@ -97,5 +97,20 @@ module daniel
             endif
         enddo
     end subroutine
+!================================================================================================
+!     ENCONTRA O PIVOTE OTIMO SEGUNDO O CRITERIO DE MARKOWITZ
+!================================================================================================  
+	function Markowitz(A)
+		implicit none
+		type(pivot) :: Markowitz
+		type(ColPacked) :: A
+		integer, allocatable :: row_aux(:)
+		real :: u!threshold pivoting
+		integer :: i, j, k
+		
+		allocate(r_aux(size(A%len_col)))
+		row_aux = 0
+		do i = 1, size(A%value)
+	end function
 
 end module

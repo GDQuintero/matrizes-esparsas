@@ -1,11 +1,16 @@
 module gustavo
+<<<<<<< HEAD
 
+=======
+!     use daniel
+    
+>>>>>>> dd1bb7e3e2e276da8aa91efc014fb5e60e85bd11
     !TYPE QUE EMPACOTA UM VETOR ESPARSO
     type PackedVector
         integer :: nz, NFull
         real, allocatable :: Value(:)
         integer, allocatable :: Vector_Index(:)
-    end type PackedVector
+    end type 
     
     !TYPE QUE EMPACOTA UMA MATRIZ NO ESQUEMA COORDENADAS
     type EntryPacked
@@ -26,18 +31,22 @@ module gustavo
         real, allocatable :: Value(:)
     end type 
     
+    type Pivot
+        integer :: Linha, Coluna
+        real :: Value
+    end type
     contains
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UM VETOR ESPARSO 
     !================================================================================================
-    function Gather(FullVector)
+    function Gather(FullVector,VectorDensity)
         implicit none
         
-        integer :: i, j, NonZero, Density, n
+        integer :: i, j, NonZero, Density, n, VectorDensity
         real :: FullVector(:)
         type(PackedVector) :: Gather
         
-        NonZero = 0; n = size(FullVector); j = 0; Density = int(n*0.5d0)+1
+        NonZero = 0; n = size(FullVector); j = 0; Density = int(n*VectorDensity)+1
         
         do i = 1, n
             if (FullVector(i) .ne. 0.d0) then
@@ -60,14 +69,14 @@ module gustavo
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UMA MATRIZ ESPARSA (POR COLUNAS)
     !================================================================================================
-    function GatherCol(FullMatrix)
+    function GatherCol(FullMatrix,MatrixDensity)
         implicit none
         
-        integer :: i, j, k, Density, m, n, NonZero
+        integer :: i, j, k, Density, m, n, NonZero, MatrixDensity
         real :: FullMatrix(:,:)
         type(ColPacked) :: GatherCol
         
-        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*0.5)+1; NonZero = 0; k = 0
+        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
         allocate(GatherCol%Len_Col(n),GatherCol%Col_Start(n))
         allocate(GatherCol%Row_Index(Density),GatherCol%Value(Density))
         
@@ -89,14 +98,15 @@ module gustavo
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UMA MATRIZ ESPARSA (POR LINHAS)
     !================================================================================================
-    function GatherRow(FullMatrix)
+    function GatherRow(FullMatrix,MatrixDensity)
         implicit none
         
-        integer :: i, j, k, Density, m, n, NonZero
+        integer :: i, j, k, Density, m, n, NonZero, MatrixDensity
         real :: FullMatrix(:,:)
         type(RowPacked) :: GatherRow
         
-        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*0.5)+1; NonZero = 0; k = 0
+        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:))
+        Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
         allocate(GatherRow%Len_Row(n),GatherRow%Row_Start(n))
         allocate(GatherRow%Col_Index(Density),GatherRow%Value(Density))
         
@@ -184,4 +194,36 @@ module gustavo
         RowSumColPacked = A
     end function RowSumColPacked
     
+    !================================================================================================
+    ! CRITERIO DE GRADO MINIMO
+    !================================================================================================
+    function MinDeg(A)
+        implicit none
+        
+        integer :: i, j, k, rk, n
+        integer, allocatable :: ind(:)
+        type(RowPacked) :: A
+        type(Pivot) :: MinDeg        
+        
+        rk = minval(A%Len_Row); n = size(A%Len_Row); j = 0; k = 0
+        
+        do i = 1, n
+            if (A%Len_Row(i) .eq. rk) then
+                j = j + 1
+            endif
+        enddo
+        print*, j
+        allocate(ind(2)); j = 0
+        
+!         do i = 1, n
+!             j = j + 1
+!             if (A%Len_Row(i) .eq. rk) then
+!                 k = k + 1
+!                 ind(k) = j
+!             endif
+!         enddo
+        
+!         print*, ind
+        
+    end function MinDeg
 end module
