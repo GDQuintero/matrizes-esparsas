@@ -100,17 +100,17 @@ module daniel
 !================================================================================================
 !     ENCONTRA O PIVOTE OTIMO SEGUNDO O CRITERIO DE MARKOWITZ
 !================================================================================================  
-	function Markowitz(A)
-		implicit none
-		type(pivot) :: Markowitz
-		type(ColPacked) :: A
-		integer, allocatable :: row_aux(:)
-		real :: u!threshold pivoting
-		integer :: i, j, k
-		
-		allocate(r_aux(size(A%len_col)))
-		row_aux = 0
-		do i = 1, size(A%value)
+! 	function Markowitz(A)
+! 		implicit none
+! 		type(pivot) :: Markowitz
+! 		type(ColPacked) :: A
+! 		integer, allocatable :: row_aux(:)
+! 		real :: u!threshold pivoting
+! 		integer :: i, j, k
+! 		
+! 		allocate(r_aux(size(A%len_col)))
+! 		row_aux = 0
+! 		do i = 1, size(A%value)
 	end function
 
 end module
