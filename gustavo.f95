@@ -1,10 +1,5 @@
 module gustavo
-<<<<<<< HEAD
 
-=======
-!     use daniel
-    
->>>>>>> dd1bb7e3e2e276da8aa91efc014fb5e60e85bd11
     !TYPE QUE EMPACOTA UM VETOR ESPARSO
     type PackedVector
         integer :: nz, NFull
