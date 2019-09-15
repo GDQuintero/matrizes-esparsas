@@ -7,7 +7,8 @@ program main
     type(PackedVector) :: xx, yy, soma
     type(RowPacked) :: C, E
     type(ColPacked) :: D
-    
+    type(Pivot) :: Pivo
+    integer :: VectorDensity = 0.25, MatrixDensity = 0.6
     w = 0.d0
     
     A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
@@ -16,7 +17,14 @@ program main
     A(4,:) = (/0.d0, 4.d0, 0.d0, -4.d0, 0.d0/)
     A(5,:) = (/5.d0, 0.d0, -5.d0, 0.d0, 6.d0/)
     
+    B(1,:) = (/1.d0, 0.d0, 2.d0, 3.d0, 0.d0/)
+    B(2,:) = (/0.d0, 2.d0, 0.d0, 0.d0, 2.d0/)
+    B(3,:) = (/2.d0, 0.d0, 1.d0, 0.d0, 0.d0/)
+    B(4,:) = (/3.d0, 0.d0, 0.d0, 2.d0, 1.d0/)
+    B(5,:) = (/0.d0, 2.d0, 0.d0, 1.d0, 1.d0/)
     
-    C = GatherRow(A)
+    C = GatherRow(B,MatrixDensity)
+    
+    Pivo = MinDeg(C)
     
 end program
