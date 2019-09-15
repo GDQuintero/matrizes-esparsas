@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 program daniel
 	implicit none
 	!TYPE QUE EMPACOTA UM VETOR ESPARSO
@@ -31,10 +32,24 @@ program daniel
     subroutine col_permutation(A,j1,j2)! supposed that j1 < j2
         implicit none
         type(col_packed) :: A
+=======
+module daniel
+    use gustavo
+    
+    contains
+    
+!================================================================================================
+!     PERMUTA DUAS COLUNAS DUMA MATRIZ EMPACOTADA POR COLUNAS, J1 É MENOR DO QUE J2
+!================================================================================================
+    subroutine col_permutation(A,j1,j2)! supposed that j1 < j2
+        implicit none
+        type(ColPacked) :: A
+>>>>>>> 37fc9daaf4f1b639ffbc730b79ae4b85882793d2
         integer :: j1, j2, i, m, i_aux
         integer, allocatable :: inter(:)
         real, allocatable :: array(:)
         real :: r_aux
+<<<<<<< HEAD
         m = max(A%Len_Col(j1),A%Len_Col(j2))
         if(A%Len_Col(j1) /= A%Len_Col(j2)) then
             allocate(inter(m), array(m))
@@ -55,6 +70,28 @@ program daniel
 			enddo
 			do i = 1, A%Len_Col(j2)!escrevemos as entradas da coluna j2 no lugar da j1
                 A%value(i-1+A%col_start(j1)) = A%value(i-1+A%Col_Start(j2))
+=======
+        m = max(A%len_col(j1),A%len_col(j2))
+        if(A%len_col(j1) /= A%len_col(j2)) then
+            allocate(inter(m), array(m))
+        end if
+		if(A%len_col(j1) == A%len_col(j2)) then
+			do i = 1, m
+				r_aux = A%value(i-1+A%col_start(j2))
+				i_aux = A%row_index(i-1+A%col_start(j2))
+				A%value(i-1+A%col_start(j2)) = A%value(i-1+A%col_start(j1))
+				A%row_index(i-1+A%col_start(j2)) = A%row_index(i-1+A%col_start(j1))
+				A%value(i-1+A%col_start(j1)) = r_aux
+				A%row_index(i-1+A%col_start(j1)) = i_aux
+			enddo
+		elseif(A%len_col(j1) > A%len_col(j2)) then
+			do i = 1, m
+				array(i) = A%value(i-1+A%col_start(j1))
+				inter(i) = A%row_index(i-1+A%col_start(j1))
+			enddo
+			do i = 1, A%len_col(j2)!escrevemos as entradas da coluna j2 no lugar da j1
+                A%value(i-1+A%col_start(j1)) = A%value(i-1+A%col_start(j2))
+>>>>>>> 37fc9daaf4f1b639ffbc730b79ae4b85882793d2
                 A%row_index(i-1+A%col_start(j1)) = A%row_index(i-1+A%col_start(j2))
 			enddo
 			if(j2-j1 > 1) then!empurramos à esquerda os elementos entre as colunas j1 e j2
@@ -103,7 +140,13 @@ program daniel
             A%col_start(i+1) = A%len_col(i)+A%col_start(i)
 		enddo
     end subroutine col_permutation
+<<<<<<< HEAD
     
+=======
+!================================================================================================
+!     PERMUTA DUAS LINHAS DUMA MATRIZ EMPACOTADA POR COLUNAS, I1 É MENOR DO QUE I2
+!================================================================================================    
+>>>>>>> 37fc9daaf4f1b639ffbc730b79ae4b85882793d2
     subroutine row_permutation(A, i1, i2)
         implicit none
         type(col_packed) :: A
@@ -116,4 +159,9 @@ program daniel
             endif
         enddo
     end subroutine
+<<<<<<< HEAD
 end program
+=======
+
+end module
+>>>>>>> 37fc9daaf4f1b639ffbc730b79ae4b85882793d2
