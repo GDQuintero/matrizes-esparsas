@@ -8,8 +8,6 @@ program main
     type(RowPacked) :: C, E
     type(ColPacked) :: D
     type(Pivot) :: Pivo
-    integer :: VectorDensity = 0.25, MatrixDensity = 0.6
-    w = 0.d0
     
     A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
     A(2,:) = (/2.d0, 0.d0, -2.d0, 0.d0, 3.d0/)

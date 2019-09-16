@@ -123,11 +123,18 @@ module daniel
             do i = 1, n
                 if(aux(i,j) == min_prod) then
                     if(min_prod == 0) then
-                    
-                    else then
+                        do while(k .ge. A%col_start(j) .and. k < A%col_start(j+1))
+                            if(A%row_index(k) == i) then
+                                Markowitz%row = i
+                                Markowitz%col = j
+                                Markowitz%value = A%value(k)
+                                exit
+                            endif
+                        enddo
+                    else !then
                         do while(k > i)
                             if(abs(A%value(A%col_start(j))) .ge. u*abs(aux(k,j))) then 
-                                k=1
+                                k = 1
                             endif
                         enddo
                     endif
