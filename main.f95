@@ -3,10 +3,8 @@ program main
     use daniel
     
     real, dimension(5,5) :: A, B
-    real, dimension(5) :: x, y, w
-    type(PackedVector) :: xx, yy, soma
-    type(RowPacked) :: C, E
-    type(ColPacked) :: D
+    type(RowPacked) :: E
+    type(ColPacked) :: C
     type(Pivot) :: Pivo
     
     A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
@@ -21,7 +19,7 @@ program main
     B(4,:) = (/3.d0, 1.d0, 0.d0, 2.d0, 1.d0/)
     B(5,:) = (/0.d0, 2.d0, 0.d0, 1.d0, 1.d0/)
     
-    C = GatherRow(B,MatrixDensity)
+    E = GatherRow(B,MatrixDensity)
     
-    Pivo = MinDeg(C)
+    
 end program

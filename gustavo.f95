@@ -71,8 +71,8 @@ module gustavo
     function GatherCol(FullMatrix,MatrixDensity)
         implicit none
         
-        integer :: i, j, k, Density, m, n, NonZero, MatrixDensity
-        real :: FullMatrix(:,:)
+        integer :: i, j, k, Density, m, n, NonZero
+        real :: FullMatrix(:,:), MatrixDensity
         type(ColPacked) :: GatherCol
         
         m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
