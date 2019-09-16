@@ -106,7 +106,8 @@ module daniel
 		type(ColPacked) :: A
 		integer, allocatable :: aux(:,:)
 		real, parameter :: u = 0.25!threshold pivoting
-		integer :: i, j, k, n, tau, min_prod
+		integer :: i, j, k, l, n, tau, min_prod
+		logical :: bool, lo
 		n = size(A%len_col)!numero das colunas de A
 		tau = size(A%row_index)
 		allocate(aux(n,n))
@@ -131,10 +132,23 @@ module daniel
                                 exit
                             endif
                         enddo
-                    else !then
-                        do while(k > i)
-                            if(abs(A%value(A%col_start(j))) .ge. u*abs(aux(k,j))) then 
-                                k = 1
+                    else 
+                        do while(k .ge. A%col_start(j) .and. k < A%col_start(j+1))
+                            if(A%row_index(k) == i) then!if(abs(A%value(k)) .ge. u*abs(aux(k,j))) then 
+                                do while(l .ge. A%col_start(j) .and. l < A%col_start(j+1) .and. A%row_index(l) > i)
+                                    lo = .true.
+                                    if (abs(A%value(k)) .ge. u*abs(A%value(l))) then
+                                        bool = .true.
+                                    else    
+                                        bool = .false.
+                                        lo = lo .and. bool
+                                    endif
+                                end do
+                                if(lo .and. bool) then
+                                    Markowitz%row = i
+                                    Markowitz%col = j
+                                    Markowitz%value = A%value(k)
+                                endif
                             endif
                         enddo
                     endif
