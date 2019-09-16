@@ -4,7 +4,7 @@ module daniel
     contains
     
 !================================================================================================
-!     PERMUTA DUAS COLUNAS DUMA MATRIZ EMPACOTADA POR COLUNAS, J1 É MENOR DO QUE J2
+!     PERMUTA DUAS COLUNAS DUMA MATRIZ EMPACOTADA POR **COLUNAS**, J1 É MENOR DO QUE J2
 !================================================================================================
     subroutine col_permutation(A,j1,j2)! supposed that j1 < j2
         implicit none
@@ -82,7 +82,7 @@ module daniel
 		enddo
     end subroutine col_permutation
 !================================================================================================
-!     PERMUTA DUAS LINHAS DUMA MATRIZ EMPACOTADA POR COLUNAS, I1 É MENOR DO QUE I2
+!     PERMUTA DUAS LINHAS DUMA MATRIZ EMPACOTADA POR **COLUNAS**, I1 É MENOR DO QUE I2
 !================================================================================================    
     subroutine row_permutation(A, i1, i2)
         implicit none
