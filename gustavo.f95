@@ -199,13 +199,13 @@ module gustavo
     function MinDeg(A)
         implicit none
         
-        integer :: i, j, k, l, rk, n, ind1, indj
+        integer :: i, j, k, l, rk, n
         integer, allocatable :: ind(:)
         type(RowPacked) :: A
         type(Pivot) :: MinDeg  
         real :: akj, akk
         
-        rk = minval(A%Len_Row); n = size(A%Len_Row); j = 0; k = 0
+        rk = minval(A%Len_Row); n = size(A%Len_Row); j = 0; k = 0; l = 0
         
         do i = 1, n
             if (A%Len_Row(i) .eq. rk) then
@@ -223,6 +223,13 @@ module gustavo
             endif 
         enddo
         
+        if (j .eq. 1) then
+            MinDeg%Value = A%Value(A%Row_Start(ind(1)))
+            MinDeg%Row = ind(1)
+            MinDeg%Col = MinDeg%Row
+            return
+        endif
+        
         k = 0; j = 0
         
         do i = 1, l
@@ -232,17 +239,16 @@ module gustavo
                     exit
                 endif
             enddo
-            print*, akk
             do j = 1, rk
-                akj = A%Value(A%Row_Start(ind(i))) + j - 1
-                if (A%Col_Index(A%Row_Start(ind(i)) + j - 1) .ne. ind(i) .and. abs(akk) .ge. abs(akj)) then
+                akj = A%Value(A%Row_Start(ind(i)) + j - 1)
+                if (A%Col_Index(A%Row_Start(ind(i)) + j - 1) .ne. ind(i) .and. abs(akk) .ge. u*abs(akj)) then
                     MinDeg%Value = akk
-                    exit
+                    MinDeg%Row = ind(i)
+                    MinDeg%Col = MinDeg%Row
+                    return
                 endif
             enddo
         enddo
-        
-!         print*, MinDeg%Value
         
     end function MinDeg
 end module
