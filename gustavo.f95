@@ -30,6 +30,9 @@ module gustavo
         integer :: Linha, Coluna
         real :: Value
     end type
+    
+    integer :: VectorDensity = 0.25, MatrixDensity = 0.6
+        
     contains
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UM VETOR ESPARSO 
@@ -207,16 +210,18 @@ module gustavo
                 j = j + 1
             endif
         enddo
-
-        allocate(ind(j))
+        
+        allocate(ind(j)); j = 0
         
         do i = 1, n
             j = j + 1
             if (A%Len_Row(i) .eq. rk) then
                 k = k + 1
-!                 ind(k) = j
-            endif
+                ind(k) = j
+            endif 
         enddo
+        
+        
         
         print*, ind
         
