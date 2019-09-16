@@ -140,7 +140,7 @@ module daniel
                                     if (abs(A%value(k)) .ge. u*abs(A%value(l))) then
                                         bool = .true.
                                     else    
-                                        bool = .false.
+                                        bool = .false. 
                                         lo = lo .and. bool
                                     endif
                                 end do
