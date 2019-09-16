@@ -100,17 +100,40 @@ module daniel
 !================================================================================================
 !     ENCONTRA O PIVOTE OTIMO SEGUNDO O CRITERIO DE MARKOWITZ
 !================================================================================================  
-! 	function Markowitz(A)
-! 		implicit none
-! 		type(pivot) :: Markowitz
-! 		type(ColPacked) :: A
-! 		integer, allocatable :: row_aux(:)
-! 		real :: u!threshold pivoting
-! 		integer :: i, j, k
-! 		
-! 		allocate(r_aux(size(A%len_col)))
-! 		row_aux = 0
-! 		do i = 1, size(A%value)
-! 	end function
+	function Markowitz(A)
+		implicit none
+		type(pivot) :: Markowitz
+		type(ColPacked) :: A
+		integer, allocatable :: aux(:,:)
+		real, parameter :: u = 0.25!threshold pivoting
+		integer :: i, j, k, n, tau, min_prod
+		n = size(A%len_col)!numero das colunas de A
+		tau = size(A%row_index)
+		allocate(aux(n,n))
+		aux = 0
+		do i = 1, tau
+            aux(1, A%len_col(i)) = aux(1, A%len_col(i)) + 1
+		enddo
+		do i = 1, n
+            k = aux(i,1)
+            aux(:,i) = (k-1)*(A%len_col-1)
+		enddo
+		min_prod = minval(aux)
+		do j = 1, n
+            do i = 1, n
+                if(aux(i,j) == min_prod) then
+                    if(min_prod == 0) then
+                    
+                    else then
+                        do while(k > i)
+                            if(abs(A%value(A%col_start(j))) .ge. u*abs(aux(k,j))) then 
+                                k=1
+                            endif
+                        enddo
+                    endif
+                endif 
+            enddo
+		enddo
+	end function
 
 end module
