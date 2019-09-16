@@ -27,12 +27,13 @@ module gustavo
     end type 
     
     type Pivot
-        integer :: Linha, Coluna
+        integer :: Row, Col
         real :: Value
     end type
     
-    integer :: VectorDensity = 0.25, MatrixDensity = 0.6
-        
+    real :: VectorDensity = 0.25, MatrixDensity = 0.6
+    real :: u = 0.25 !PARAMETRO LIMITE (THRESHOLD PIVOTING)
+    
     contains
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UM VETOR ESPARSO 
@@ -99,8 +100,8 @@ module gustavo
     function GatherRow(FullMatrix,MatrixDensity)
         implicit none
         
-        integer :: i, j, k, Density, m, n, NonZero, MatrixDensity
-        real :: FullMatrix(:,:)
+        integer :: i, j, k, Density, m, n, NonZero
+        real :: FullMatrix(:,:), MatrixDensity
         type(RowPacked) :: GatherRow
         
         m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:))
@@ -109,7 +110,7 @@ module gustavo
         allocate(GatherRow%Col_Index(Density),GatherRow%Value(Density))
         
         do i = 1, m
-            GatherRow%Row_Start(i) = 1 + k
+            GatherRow%Row_Start(i) = k + 1
             do j = 1,n
                 if (FullMatrix(i,j) .ne. 0) then
                     k = k + 1
@@ -198,20 +199,21 @@ module gustavo
     function MinDeg(A)
         implicit none
         
-        integer :: i, j, k, rk, n
+        integer :: i, j, k, l, rk, n, ind1, indj
         integer, allocatable :: ind(:)
         type(RowPacked) :: A
-        type(Pivot) :: MinDeg        
+        type(Pivot) :: MinDeg  
+        real :: akj, akk
         
         rk = minval(A%Len_Row); n = size(A%Len_Row); j = 0; k = 0
         
         do i = 1, n
             if (A%Len_Row(i) .eq. rk) then
-                j = j + 1
+                l = l + 1
             endif
         enddo
         
-        allocate(ind(j)); j = 0
+        allocate(ind(l))
         
         do i = 1, n
             j = j + 1
@@ -221,9 +223,27 @@ module gustavo
             endif 
         enddo
         
+        k = 0
         
+        do i = 1, l
+            do k = 1, rk
+                if (A%Col_Index(A%Row_Start(ind(i)) + k - 1) .eq. ind(i)) then
+                    akk = A%Value(A%Row_Start(ind(i)) + k - 1)
+                    exit
+                endif
+            enddo
         
-        print*, ind
+            do j = 1, rk
+                akj = A%Value(ind(i)) + j - 1
+                if (A%Col_Index(A%Row_Start(ind(i)) + j - 1) .ne. ind(i) .and. abs(akk) .ge. abs(akj)) then
+!                     MinDeg%Value = akk
+!                     exit
+                    print*, 
+                endif
+            enddo
+        enddo
+        
+        print*, MinDeg%Value
         
     end function MinDeg
 end module
