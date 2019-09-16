@@ -223,7 +223,7 @@ module gustavo
             endif 
         enddo
         
-        k = 0
+        k = 0; j = 0
         
         do i = 1, l
             do k = 1, rk
@@ -232,18 +232,17 @@ module gustavo
                     exit
                 endif
             enddo
-        
+            print*, akk
             do j = 1, rk
-                akj = A%Value(ind(i)) + j - 1
+                akj = A%Value(A%Row_Start(ind(i))) + j - 1
                 if (A%Col_Index(A%Row_Start(ind(i)) + j - 1) .ne. ind(i) .and. abs(akk) .ge. abs(akj)) then
-!                     MinDeg%Value = akk
-!                     exit
-                    print*, 
+                    MinDeg%Value = akk
+                    exit
                 endif
             enddo
         enddo
         
-        print*, MinDeg%Value
+!         print*, MinDeg%Value
         
     end function MinDeg
 end module
