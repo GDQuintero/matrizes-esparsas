@@ -1,6 +1,6 @@
 program main
     use gustavo
-    use daniel
+    !use daniel
     
     real, dimension(5,5) :: A, B
     type(RowPacked) :: E
