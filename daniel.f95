@@ -128,7 +128,7 @@ module daniel
                             if(A%row_index(k) == i) then
                                 Markowitz%row = i
                                 Markowitz%col = j
-                                Markowitz%value = A%value(k)
+                                !Markowitz%value = A%value(k)
                                 exit
                             endif
                         enddo
