@@ -3,7 +3,7 @@ program main
     use daniel
     
     real, dimension(5,5) :: A, B
-    type(RowPacked) :: E
+    type(RowPacked) :: E, D
     type(ColPacked) :: C
     type(Pivot) :: Pivo
     
@@ -19,7 +19,8 @@ program main
     B(4,:) = (/3.d0, 1.d0, 0.d0, 2.d0, 1.d0/)
     B(5,:) = (/0.d0, 2.d0, 0.d0, 1.d0, 1.d0/)
     
-    E = GatherRow(B,MatrixDensity)
+    E = GatherRow(B)
     
+    D =  OneStepGaussElimination(E)
     
 end program

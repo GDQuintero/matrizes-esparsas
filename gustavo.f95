@@ -67,11 +67,11 @@ module gustavo
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UMA MATRIZ ESPARSA (POR COLUNAS)
     !================================================================================================
-    function GatherCol(FullMatrix,MatrixDensity)
+    function GatherCol(FullMatrix)
         implicit none
         
         integer :: i, j, k, Density, m, n, NonZero
-        real :: FullMatrix(:,:), MatrixDensity
+        real :: FullMatrix(:,:)
         type(ColPacked) :: GatherCol
         
         m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
@@ -96,11 +96,11 @@ module gustavo
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UMA MATRIZ ESPARSA (POR LINHAS)
     !================================================================================================
-    function GatherRow(FullMatrix,MatrixDensity)
+    function GatherRow(FullMatrix)
         implicit none
         
         integer :: i, j, k, Density, m, n, NonZero
-        real :: FullMatrix(:,:), MatrixDensity
+        real :: FullMatrix(:,:)
         type(RowPacked) :: GatherRow
         
         m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:))
@@ -122,6 +122,30 @@ module gustavo
             NonZero = 0
         enddo
     end function GatherRow
+    
+    !================================================================================================
+    ! EMPACOTAMENTO - FORMA LINHA A FORMA COLUNA
+    !================================================================================================    
+    function TransPackRowCol(X)
+        implicit none
+        
+        integer :: m, n, NonZero = 0, i, j
+        real, allocatable :: A(:,:)
+        type(RowPacked) :: X
+        type(ColPacked) :: TransPackRowCol
+        
+        n = size(X%Len_Row); m = maxval(X%Col_Index)
+        allocate(A(m,n))
+        
+        do i = 1, n
+            do j = X%Row_Start(i), X%Row_Start(i) + X%Len_Row(i) - 1
+                A(i,X%Col_Index(j)) = X%Value(j)  
+            enddo
+        enddo
+        
+        TransPackRowCol = GatherCol(A)
+        
+    end function TransPackRowCol
     
     !================================================================================================
     ! SOMA DE DUA LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS
@@ -198,7 +222,7 @@ module gustavo
     function MinDeg(A)
         implicit none
         
-        integer :: i, j, k, l, rk, n
+        integer :: i=0, j=0, k=0, l=0, rk=0, n=0
         integer, allocatable :: ind(:)
         type(RowPacked) :: A
         type(Pivot) :: MinDeg  
@@ -250,5 +274,29 @@ module gustavo
         enddo
         
     end function MinDeg
+    
+    function OneStepGaussElimination(A)
+        implicit none
+        
+        type(RowPacked) :: OneStepGaussElimination, A
+        type(Pivot) :: Pivo
+        integer :: Criterio
+        
+        print*, "Escolha um Critério de Pivotamento Local (digite apenas o numero): "
+        print*, "1: Criterio de Markowitz"
+        print*, "2: Criterio de Grau Minimo"
+        read*, Criterio
+        
+        if (Criterio .eq. 1) then
+            print*, "O Daniel ainda nao implementou :("
+        elseif (Criterio .eq. 1) then
+            Pivo = MinDeg(A)
+        else
+            print*, "Erro: Digitou uma opcao invalida"
+            return
+        endif
+        
+!         call col_permutation(A,1,Pivo%Col)
+    end function OneStepGaussElimination
     
 end module
