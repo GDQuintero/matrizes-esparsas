@@ -147,7 +147,7 @@ module daniel
                                 if(lo .and. bool) then
                                     Markowitz%row = i
                                     Markowitz%col = j
-                                    Markowitz%value = A%value(k)
+                                    !Markowitz%value = A%value(k)
                                 endif
                             endif
                         enddo
