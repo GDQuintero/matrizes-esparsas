@@ -368,6 +368,7 @@ module gustavo
         type(Pivot) :: Pivo
         integer :: Criterio
         
+        call system("clear")
         print*, "Escolha um Critério de Pivotamento Local (digite apenas o numero): "
         print*, "1: Criterio de Markowitz"
         print*, "2: Criterio de Grau Minimo"
@@ -375,6 +376,7 @@ module gustavo
         
         if (Criterio .eq. 1) then
             print*, "Ate que enfim"
+            call system("clear")
         elseif (Criterio .eq. 2) then
             Pivo = MinDeg(A)
         else
