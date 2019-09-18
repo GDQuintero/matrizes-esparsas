@@ -16,12 +16,14 @@ module gustavo
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE COLUNAS
     type ColPacked
+        integer :: Row, Col
         integer, allocatable :: Len_Col(:), Col_Start(:), Row_Index(:)
         real, allocatable :: Value(:)
     end type 
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE LINHAS
     type RowPacked
+        integer :: Row, Col
         integer, allocatable :: Len_Row(:), Row_Start(:), Col_Index(:)
         real, allocatable :: Value(:)
     end type 
@@ -77,7 +79,7 @@ module gustavo
         m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
         allocate(GatherCol%Len_Col(n),GatherCol%Col_Start(n))
         allocate(GatherCol%Row_Index(Density),GatherCol%Value(Density))
-        
+        GatherCol%Row = m; GatherCol%Col = n
         do j = 1, n
             GatherCol%Col_Start(j) = 1 + k
             do i = 1,m
@@ -107,7 +109,7 @@ module gustavo
         Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
         allocate(GatherRow%Len_Row(n),GatherRow%Row_Start(n))
         allocate(GatherRow%Col_Index(Density),GatherRow%Value(Density))
-        
+        GatherRow%Row = m; GatherRow%Col = n
         do i = 1, m
             GatherRow%Row_Start(i) = k + 1
             do j = 1,n
@@ -155,9 +157,18 @@ module gustavo
         
         type(RowPacked) :: A
         type(ColPacked) :: PackRowCol
-        integer :: n=0, m=0, k=0
+        integer :: n=0, m=0, k=0, i
         
-        n = size(A%Len_Row); m = maxval(A%Col_Index)
+        PackRowCol%Row = A%Row; PackRowCol%Col = A%Col
+        allocate(PackRowCol%Len_Col(A%Col),PackRowCol%Col_Start(A%Col))
+        
+        do i = 1, A%Row
+            k = k + A%Len_Row(i)
+        enddo
+        
+        do i = 1, k
+            PackRowCol%Len_Col(A%Col_Index(i)) = PackRowCol%Len_Col(A%Col_Index(i)) + 1
+        enddo
         
     end function PackRowCol
     
@@ -302,7 +313,7 @@ module gustavo
         read*, Criterio
         
         if (Criterio .eq. 1) then
-            print*, "O Daniel ainda nao implementou >:c", " ", ":v"
+            print*, "O Daniel ainda nao implementou >:c"
         elseif (Criterio .eq. 2) then
             Pivo = MinDeg(A)
         else
