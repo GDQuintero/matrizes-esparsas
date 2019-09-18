@@ -148,6 +148,20 @@ module gustavo
     end function TransPackRowCol
     
     !================================================================================================
+    ! EMPACOTAMENTO - FORMA LINHA A FORMA COLUNA
+    !================================================================================================ 
+    function PackRowCol(A)
+        implicit none
+        
+        type(RowPacked) :: A
+        type(ColPacked) :: PackRowCol
+        integer :: n=0, m=0, k=0
+        
+        n = size(A%Len_Row); m = maxval(A%Col_Index)
+        
+    end function PackRowCol
+    
+    !================================================================================================
     ! SOMA DE DUA LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS
     !================================================================================================
     function RowSumColPacked(A,ind1,ind2,alpha,w)
@@ -288,8 +302,8 @@ module gustavo
         read*, Criterio
         
         if (Criterio .eq. 1) then
-            print*, "O Daniel ainda nao implementou :("
-        elseif (Criterio .eq. 1) then
+            print*, "O Daniel ainda nao implementou >:c", " ", ":v"
+        elseif (Criterio .eq. 2) then
             Pivo = MinDeg(A)
         else
             print*, "Erro: Digitou uma opcao invalida"
