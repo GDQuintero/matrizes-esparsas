@@ -16,14 +16,12 @@ module gustavo
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE COLUNAS
     type ColPacked
-        integer :: Row, Col
         integer, allocatable :: Len_Col(:), Col_Start(:), Row_Index(:)
         real, allocatable :: Value(:)
     end type 
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE LINHAS
     type RowPacked
-        integer :: Row, Col
         integer, allocatable :: Len_Row(:), Row_Start(:), Col_Index(:)
         real, allocatable :: Value(:)
     end type 
@@ -79,7 +77,7 @@ module gustavo
         m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
         allocate(GatherCol%Len_Col(n),GatherCol%Col_Start(n))
         allocate(GatherCol%Row_Index(Density),GatherCol%Value(Density))
-        GatherCol%Row = m; GatherCol%Col = n
+        
         do j = 1, n
             GatherCol%Col_Start(j) = 1 + k
             do i = 1,m
@@ -109,7 +107,7 @@ module gustavo
         Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
         allocate(GatherRow%Len_Row(n),GatherRow%Row_Start(n))
         allocate(GatherRow%Col_Index(Density),GatherRow%Value(Density))
-        GatherRow%Row = m; GatherRow%Col = n
+        
         do i = 1, m
             GatherRow%Row_Start(i) = k + 1
             do j = 1,n
@@ -157,20 +155,83 @@ module gustavo
         
         type(RowPacked) :: A
         type(ColPacked) :: PackRowCol
-        integer :: n=0, m=0, k=0, i
+        integer :: n=0, m=0, k=0, i=0, j=0, l=0
         
-        PackRowCol%Row = A%Row; PackRowCol%Col = A%Col
-        allocate(PackRowCol%Len_Col(A%Col),PackRowCol%Col_Start(A%Col))
-        
-        do i = 1, A%Row
+        m = size(A%Len_Row)
+        allocate(PackRowCol%Len_Col(m),PackRowCol%Col_Start(m))
+        PackRowCol%Len_Col = 0; PackRowCol%Col_Start = 1
+                
+        do i = 1, m
             k = k + A%Len_Row(i)
         enddo
+        
+        allocate(PackRowCol%Row_Index(k),PackRowCol%Value(k))
+        PackRowCol%Row_Index = 0; PackRowCol%Value = 0
         
         do i = 1, k
             PackRowCol%Len_Col(A%Col_Index(i)) = PackRowCol%Len_Col(A%Col_Index(i)) + 1
         enddo
         
+        do i = 2, m
+            PackRowCol%Col_Start(i) = PackRowCol%Col_Start(i-1) + PackRowCol%Len_Col(i-1)
+        enddo
+        k = 0
+        do i = 1, m
+            do j = 1, A%Len_Row(i)
+                l = l + 1
+                do while (PackRowCol%Row_Index(PackRowCol%Col_Start(A%Col_Index(l))+k) .ne. 0)
+                    k = k + 1
+                enddo
+                PackRowCol%Row_Index(PackRowCol%Col_Start(A%Col_Index(l))+k) = i
+                PackRowCol%Value(PackRowCol%Col_Start(A%Col_Index(l))+k) = A%Value(l)
+                k = 0
+            enddo
+        enddo
+        
     end function PackRowCol
+    
+    !================================================================================================
+    ! EMPACOTAMENTO - FORMA COLUNA A FORMA LINHA
+    !================================================================================================ 
+    function PackColRow(A)
+        implicit none
+        
+        type(RowPacked) :: PackColRow
+        type(ColPacked) :: A
+        integer :: n=0, m=0, k=0, i=0, j=0, l=0
+        
+        m = size(A%Len_Col)
+        allocate(PackColRow%Len_Row(m),PackColRow%Row_Start(m))
+        PackColRow%Len_Row = 0; PackColRow%Row_Start = 1
+                
+        do i = 1, m
+            k = k + A%Len_Col(i)
+        enddo
+        
+        allocate(PackColRow%Col_Index(k),PackColRow%Value(k))
+        PackColRow%Col_Index = 0; PackColRow%Value = 0
+        
+        do i = 1, k
+            PackColRow%Len_Row(A%Row_Index(i)) = PackColRow%Len_Row(A%Row_Index(i)) + 1
+        enddo
+        
+        do i = 2, m
+            PackColRow%Row_Start(i) = PackColRow%Row_Start(i-1) + PackColRow%Len_Row(i-1)
+        enddo
+        k = 0
+        do i = 1, m
+            do j = 1, A%Len_Col(i)
+                l = l + 1
+                do while (PackColRow%Col_Index(PackColRow%Row_Start(A%Row_Index(l))+k) .ne. 0)
+                    k = k + 1
+                enddo
+                PackColRow%Col_Index(PackColRow%Row_Start(A%Row_Index(l))+k) = i
+                PackColRow%Value(PackColRow%Row_Start(A%Row_Index(l))+k) = A%Value(l)
+                k = 0
+            enddo
+        enddo
+        
+    end function PackColRow
     
     !================================================================================================
     ! SOMA DE DUA LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS
@@ -313,7 +374,7 @@ module gustavo
         read*, Criterio
         
         if (Criterio .eq. 1) then
-            print*, "O Daniel ainda nao implementou >:c"
+            print*, "Ate que enfim"
         elseif (Criterio .eq. 2) then
             Pivo = MinDeg(A)
         else

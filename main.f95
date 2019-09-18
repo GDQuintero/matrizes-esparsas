@@ -3,7 +3,7 @@ program main
     use daniel
     
     real, dimension(5,5) :: A, B
-    type(RowPacked) :: E, D
+    type(RowPacked) :: D, E
     type(ColPacked) :: C
     type(Pivot) :: Pivo
     
@@ -23,6 +23,6 @@ program main
     
 !     D =  OneStepGaussElimination(E)
 
-    C = PackRowCol(E)
+    D = OneStepGaussElimination(E)
     
 end program
