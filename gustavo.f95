@@ -126,26 +126,23 @@ module gustavo
     !================================================================================================
     ! EMPACOTAMENTO - FORMA LINHA A FORMA COLUNA
     !================================================================================================    
-    function TransPackRowCol(X)
+    function Unpaking(X)
         implicit none
         
         integer :: m, n, NonZero = 0, i, j
-        real, allocatable :: A(:,:)
+        real, allocatable :: Unpaking(:,:)
         type(RowPacked) :: X
-        type(ColPacked) :: TransPackRowCol
         
         n = size(X%Len_Row); m = maxval(X%Col_Index)
-        allocate(A(m,n))
+        allocate(Unpaking(m,n))
         
         do i = 1, n
             do j = X%Row_Start(i), X%Row_Start(i) + X%Len_Row(i) - 1
-                A(i,X%Col_Index(j)) = X%Value(j)  
+                Unpaking(i,X%Col_Index(j)) = X%Value(j)  
             enddo
         enddo
-        
-        TransPackRowCol = GatherCol(A)
-        
-    end function TransPackRowCol
+                
+    end function Unpaking
     
     !================================================================================================
     ! EMPACOTAMENTO - FORMA LINHA A FORMA COLUNA
@@ -234,15 +231,15 @@ module gustavo
     end function PackColRow
     
     !================================================================================================
-    ! SOMA DE DUA LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS
+    ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS (x + alpha*y)
     !================================================================================================
-    function RowSumColPacked(A,ind1,ind2,alpha,w)
+    subroutine RRowSumColPacked(A,ind1,ind2,alpha,w)
         implicit none
         
         integer :: ind1, ind2, i, j, n, m, zeros, k, NonZero
         real :: alpha, w(:)
         real, allocatable :: aux1(:,:), aux2(:,:)
-        type(RowPacked) :: A, RowSumColPacked
+        type(RowPacked) :: A
         
         m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(ind1+1) 
         
@@ -299,8 +296,76 @@ module gustavo
         
         A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
         A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
-        RowSumColPacked = A
-    end function RowSumColPacked
+    end subroutine RRowSumColPacked
+    
+    !================================================================================================
+    ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS (alpha*x + y)
+    !================================================================================================
+    
+    subroutine RowSumColPacked(A,ind1,ind2,alpha,w)
+        implicit none
+        
+        integer :: ind1, ind2, i, j, n, m, zeros, k, NonZero
+        real :: alpha, w(:)
+        real, allocatable :: aux1(:,:), aux2(:,:)
+        type(RowPacked) :: A
+        
+        m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(ind1+1) 
+        
+
+        allocate(aux1(2,n))
+        w = 0.d0; j = A%Len_Row(ind1) + A%Row_Start(ind1); zeros = 0; k = 0; NonZero = 0
+        aux1(1,:) = A%Col_Index(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
+        aux1(2,:) = A%Value(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
+        
+        do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
+            w(A%Col_Index(i)) = A%Value(i)
+        enddo
+        
+        do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
+            if (w(A%Col_Index(i)) .ne. 0) then
+                A%Value(i) = alpha*A%Value(i) + w(A%Col_Index(i))
+                w(A%Col_Index(i)) = 0.d0
+                
+                if (A%Value(i) .eq. 0) then
+                    zeros = zeros + 1
+                endif
+            endif
+        enddo
+        
+        do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
+            if (W(A%Col_Index(i)) .ne. 0) then
+                A%Col_Index(j) = A%Col_Index(i)
+                A%Value(j) = w(A%Col_Index(i))
+                w(A%Col_Index(i)) = 0.d0
+                j = j + 1; NonZero = NonZero + 1
+                if (A%Value(j) .eq. 0) then
+                    zeros = zeros + 1
+                endif
+            endif
+        enddo
+        
+        A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero
+        A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero 
+       
+        if (zeros .ne. 0) then
+            allocate(aux2(2,j-zeros-1))
+            do i = A%Row_Start(ind1), j-1
+                if (A%Value(i) .ne. 0) then
+                    k = k + 1
+                    aux2(1,k) = A%Col_Index(i)
+                    aux2(2,k) = A%Value(i)
+                endif
+            enddo
+            A%Col_Index(A%Row_Start(ind1):) = aux2(1,:)
+            A%Value(A%Row_Start(ind1):) = aux2(2,:)
+            A%Col_Index(A%Len_Row(ind1)+1:) = aux1(1,:)
+            A%Value(A%Len_Row(ind1)+1:) = aux1(2,:)
+        endif
+        
+        A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
+        A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
+    end subroutine RowSumColPacked
     
     !================================================================================================
     ! CRITERIO DE GRADO MINIMO
@@ -360,31 +425,5 @@ module gustavo
         enddo
         
     end function MinDeg
-    
-    function OneStepGaussElimination(A)
-        implicit none
-        
-        type(RowPacked) :: OneStepGaussElimination, A
-        type(Pivot) :: Pivo
-        integer :: Criterio
-        
-        call system("clear")
-        print*, "Escolha um Critério de Pivotamento Local (digite apenas o numero): "
-        print*, "1: Criterio de Markowitz"
-        print*, "2: Criterio de Grau Minimo"
-        read*, Criterio
-        
-        if (Criterio .eq. 1) then
-            print*, "Ate que enfim"
-            call system("clear")
-        elseif (Criterio .eq. 2) then
-            Pivo = MinDeg(A)
-        else
-            print*, "Erro: Digitou uma opcao invalida"
-            return
-        endif
-        
-!         call col_permutation(A,1,Pivo%Col)
-    end function OneStepGaussElimination
     
 end module
