@@ -73,11 +73,9 @@ module daniel
                 A%row_index(i-1+A%col_start(j1)) = inter(i)
 			enddo
 		endif
-		
 		i_aux = A%len_col(j2)
 		A%len_col(j2) = A%len_col(j1)
-		A%len_col(j1) = i_aux
-		
+		A%len_col(j1) = i_aux		
 		do i = 1, size(A%len_col)!pode-se melhorar este ciclo do, nao precisa percorrer o vetor len_col tudo
             A%col_start(i+1) = A%len_col(i)+A%col_start(i)
 		enddo
@@ -166,11 +164,9 @@ module daniel
                 A%col_index(j-1+A%row_start(i1)) = inter(j)
 			enddo
 		endif
-		
 		i_aux = A%len_row(i2)
 		A%len_row(i2) = A%len_row(i1)
 		A%len_row(i1) = i_aux
-		
 		do j = 1, size(A%len_row)!pode-se melhorar este ciclo do, nao precisa percorrer o vetor len_row tudo
             A%row_start(j+1) = A%len_row(j)+A%row_start(j)
 		enddo
@@ -193,7 +189,7 @@ module daniel
 !================================================================================================
 !     ENCONTRA O PIVOTE OTIMO SEGUNDO O CRITERIO DE MARKOWITZ, MATRIZ EMPACOTADA POR **COLUNAS**
 !================================================================================================  
-	function Markowitz(A)
+	function Mark<owitz(A)
 		implicit none
 		type(pivot) :: Markowitz
 		type(ColPacked) :: A
@@ -263,5 +259,29 @@ module daniel
             enddo
 		endif
 	end function
-
+!================================================================================================
+!     SIMPLER STRATEGIES MIN ROW IN MIN COL PARA COLPACKED
+!================================================================================================  
+	function MinRowInMinCol(A)
+		type(pivot) :: MinRowInMinCol
+		type(ColPacked) :: A
+		integer :: i, j, k, n, min_row, min_col, tau
+		integer, allocatable :: len_row(:)
+		n = size(A%len_col)
+		tau = size(A%row_index)
+		allocate(len_row(n))
+		lrow = 0
+		do i = 1, tau
+            len_row(A%row_index(i)) = lrow(A%row_index(i)) + 1
+		enddo
+! 		do i = 1, n-1
+! 			if(A%len_col(i) .le. A%len_col(i+1)) then
+! 				min_col = A%len_col(i)
+! 			else
+! 				min_col = A%len_col(i+1)
+! 			endif
+! 		enddo
+		min_row = minval(len_row)!se puede buscar valor minimo y entrada en un solo recorrido
+		min_col = minval(A%len_col)		
+	end function
 end module
