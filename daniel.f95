@@ -189,7 +189,7 @@ module daniel
 !================================================================================================
 !     ENCONTRA O PIVOTE OTIMO SEGUNDO O CRITERIO DE MARKOWITZ, MATRIZ EMPACOTADA POR **COLUNAS**
 !================================================================================================  
-	function Mark<owitz(A)
+	function Markowitz(A)
 		implicit none
 		type(pivot) :: Markowitz
 		type(ColPacked) :: A
@@ -262,26 +262,26 @@ module daniel
 !================================================================================================
 !     SIMPLER STRATEGIES MIN ROW IN MIN COL PARA COLPACKED
 !================================================================================================  
-	function MinRowInMinCol(A)
-		type(pivot) :: MinRowInMinCol
-		type(ColPacked) :: A
-		integer :: i, j, k, n, min_row, min_col, tau
-		integer, allocatable :: len_row(:)
-		n = size(A%len_col)
-		tau = size(A%row_index)
-		allocate(len_row(n))
-		lrow = 0
-		do i = 1, tau
-            len_row(A%row_index(i)) = lrow(A%row_index(i)) + 1
-		enddo
-! 		do i = 1, n-1
-! 			if(A%len_col(i) .le. A%len_col(i+1)) then
-! 				min_col = A%len_col(i)
-! 			else
-! 				min_col = A%len_col(i+1)
-! 			endif
+! 	function MinRowInMinCol(A)
+! 		type(pivot) :: MinRowInMinCol
+! 		type(ColPacked) :: A
+! 		integer :: i, j, k, n, min_row, min_col, tau
+! 		integer, allocatable :: len_row(:)
+! 		n = size(A%len_col)
+! 		tau = size(A%row_index)
+! 		allocate(len_row(n))
+! 		lrow = 0
+! 		do i = 1, tau
+!             len_row(A%row_index(i)) = lrow(A%row_index(i)) + 1
 ! 		enddo
-		min_row = minval(len_row)!se puede buscar valor minimo y entrada en un solo recorrido
-		min_col = minval(A%len_col)		
-	end function
+! ! 		do i = 1, n-1
+! ! 			if(A%len_col(i) .le. A%len_col(i+1)) then
+! ! 				min_col = A%len_col(i)
+! ! 			else
+! ! 				min_col = A%len_col(i+1)
+! ! 			endif
+! ! 		enddo
+! 		min_row = minval(len_row)!se puede buscar valor minimo y entrada en un solo recorrido
+! 		min_col = minval(A%len_col)		
+! 	end function
 end module

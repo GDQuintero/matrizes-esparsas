@@ -276,11 +276,11 @@ module gustavo
             endif
         enddo
         
-        A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero
-        A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero 
+        A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero - zeros
+        A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero
        
         if (zeros .ne. 0) then
-            allocate(aux2(2,j-zeros-1))
+            allocate(aux2(2,A%Len_Row(ind1)+NonZero-zeros))
             do i = A%Row_Start(ind1), j-1
                 if (A%Value(i) .ne. 0) then
                     k = k + 1
@@ -312,9 +312,8 @@ module gustavo
         
         m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(ind1+1) 
         
-
         allocate(aux1(2,n))
-        w = 0.d0; j = A%Len_Row(ind1) + A%Row_Start(ind1); zeros = 0; k = 0; NonZero = 0
+        j = A%Len_Row(ind1) + A%Row_Start(ind1); zeros = 0; k = 0; NonZero = 0
         aux1(1,:) = A%Col_Index(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
         aux1(2,:) = A%Value(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
         
@@ -322,11 +321,14 @@ module gustavo
             w(A%Col_Index(i)) = A%Value(i)
         enddo
         
+        do i = A%Row_Start(ind1), A%Row_Start(ind1)+A%Len_Row(ind1)-1
+            A%Value(i) = alpha*A%Value(i)
+        enddo
+        
         do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
             if (w(A%Col_Index(i)) .ne. 0) then
-                A%Value(i) = alpha*A%Value(i) + w(A%Col_Index(i))
+                A%Value(i) = A%Value(i) + w(A%Col_Index(i))
                 w(A%Col_Index(i)) = 0.d0
-                
                 if (A%Value(i) .eq. 0) then
                     zeros = zeros + 1
                 endif
@@ -345,11 +347,11 @@ module gustavo
             endif
         enddo
         
-        A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero
-        A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero 
-       
+        A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero - zeros
+        A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero - zeros
+        
         if (zeros .ne. 0) then
-            allocate(aux2(2,j-zeros-1))
+            allocate(aux2(2,A%Len_Row(ind1)+NonZero-zeros))
             do i = A%Row_Start(ind1), j-1
                 if (A%Value(i) .ne. 0) then
                     k = k + 1
