@@ -48,8 +48,9 @@ program main
         read*, Criterio
         
         if (Criterio .eq. 1) then
-            print*, "Ate que enfim"
+            call system("clear")
             return
+!             Pivo = Markowitz(A)
         elseif (Criterio .eq. 2) then
             call system("clear")
             Pivo = MinDeg(A)
