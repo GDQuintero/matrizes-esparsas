@@ -22,9 +22,9 @@ program main
     
     E = GatherRow(B)
 !     D = OneStepGaussElimination(E)
-!     call row_perm_rowpacked(E,1,3)
-!     call col_perm_rowpacked(E,1,3)
-    call RowSumColPacked(E,4,1,1.,w)
+    call row_perm_rowpacked(E,1,3)
+    call col_perm_rowpacked(E,1,3)
+    call RowSumColPacked(E,2,1,1.,w)
 
     C = Unpaking(E)
     do i = 1, 5

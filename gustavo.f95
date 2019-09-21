@@ -320,8 +320,8 @@ module gustavo
         do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
             w(A%Col_Index(i)) = A%Value(i)
         enddo
-        
-        do i = A%Row_Start(ind1), A%Row_Start(ind1)+A%Len_Row(ind1)-1
+
+        do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
             A%Value(i) = alpha*A%Value(i)
         enddo
         
@@ -351,7 +351,7 @@ module gustavo
         A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero - zeros
         
         if (zeros .ne. 0) then
-            allocate(aux2(2,A%Len_Row(ind1)+NonZero-zeros))
+            allocate(aux2(2,A%Len_Row(ind1) + NonZero - zeros))
             do i = A%Row_Start(ind1), j-1
                 if (A%Value(i) .ne. 0) then
                     k = k + 1
@@ -361,10 +361,9 @@ module gustavo
             enddo
             A%Col_Index(A%Row_Start(ind1):) = aux2(1,:)
             A%Value(A%Row_Start(ind1):) = aux2(2,:)
-            A%Col_Index(A%Len_Row(ind1)+1:) = aux1(1,:)
-            A%Value(A%Len_Row(ind1)+1:) = aux1(2,:)
+            A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
+            A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
         endif
-        
         A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
         A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
     end subroutine RowSumColPacked
