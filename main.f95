@@ -21,11 +21,7 @@ program main
     B(5,:) = (/5.d0, 3.d0, 0.d0, 0.d0, 6.d0/)
     
     E = GatherRow(B)
-!     D = OneStepGaussElimination(E)
-    call row_perm_rowpacked(E,1,3)
-    call col_perm_rowpacked(E,1,3)
-    call RowSumColPacked(E,2,1,1.,w)
-
+    D = OneStepGaussElimination(E)
     C = Unpaking(E)
     do i = 1, 5
         print*, C(i,:)
@@ -57,7 +53,12 @@ program main
         elseif (Criterio .eq. 2) then
             call system("clear")
             Pivo = MinDeg(A)
-            do i = 1, A%Len_Row(Pivo%Row)
+        else
+            print*, "Erro: Digitou uma opcao invalida"
+            return
+        endif
+        
+        do i = 1, A%Len_Row(Pivo%Row)
                 if (A%Col_Index(A%Row_Start(Pivo%Row)+i-1) .eq. Pivo%Col) then
                     ValPivo = A%Value(A%Row_Start(Pivo%Row)+i-1)
                     exit
@@ -75,14 +76,7 @@ program main
                     endif                        
                 enddo
             enddo
-            return
-            
-        else
-            print*, "Erro: Digitou uma opcao invalida"
-            return
-        endif
         
-!         call col_permutation(A,1,Pivo%Col)
     end function OneStepGaussElimination
     
 end program

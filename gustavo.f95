@@ -349,9 +349,9 @@ module gustavo
         
         A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero - zeros
         A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero - zeros
-        
+       
         if (zeros .ne. 0) then
-            allocate(aux2(2,A%Len_Row(ind1) + NonZero - zeros))
+            allocate(aux2(2,A%Len_Row(ind1)))
             do i = A%Row_Start(ind1), j-1
                 if (A%Value(i) .ne. 0) then
                     k = k + 1
