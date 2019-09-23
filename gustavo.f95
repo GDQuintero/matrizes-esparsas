@@ -124,7 +124,7 @@ module gustavo
     end function GatherRow
     
     !================================================================================================
-    ! EMPACOTAMENTO - FORMA LINHA A FORMA COLUNA
+    ! DESEMPACOTAMENTO
     !================================================================================================    
     function Unpaking(X)
         implicit none

@@ -36,24 +36,33 @@ program main
         implicit none
         
         type(RowPacked) :: OneStepGaussElimination, A
+        type(ColPacked) :: B
         type(Pivot) :: Pivo
         integer :: Criterio, i, j, n
         real :: Mult=1.d0, ValPivo = 0
         
         call system("clear")
         n = size(A%Len_Row)
-        print*, "Escolha um Critério de Pivotamento Local (digite apenas o numero): "
+        print*, "Escolha uma estrategia de Pivotamento Local (digite apenas o numero): "
         print*, "1: Criterio de Markowitz"
-        print*, "2: Criterio de Grau Minimo"
+        print*, "2: Grau minimo"
+        print*, "3: Min. row in min. col"
         read*, Criterio
         
         if (Criterio .eq. 1) then
             call system("clear")
-            return
-!             Pivo = Markowitz(A)
+            B = PackRowCol(A)
+            Pivo = Markowitz(B)
+            
         elseif (Criterio .eq. 2) then
             call system("clear")
             Pivo = MinDeg(A)
+        
+        elseif (Criterio .eq. 3) then
+            call system("clear")
+            B = PackRowCol(A)
+            Pivo = MinRowInMinCol(B)
+        
         else
             print*, "Erro: Digitou uma opcao invalida"
             return
