@@ -27,21 +27,21 @@ program main
     F(2,:) = (/5., 6., 7., 8., 0., 0., 0., 0., 0./)
     F(3,:) = (/9., 1., 2., 3., 0., 0., 0., 0., 0./)
     F(4,:) = (/4., 5., 6., 7., 8., 0., 0., 0., 0./)
-    F(5,:) = (/0., 0., 0., 9., 1., 2., 0., 0., 0./)
+    F(5,:) = (/0., 0., 0., 9., 4., 2., 0., 0., 0./)
     F(6,:) = (/0., 0., 0., 0., 3., 4., 5., 6., 7./)
     F(7,:) = (/0., 0., 0., 0., 0., 8., 9., 1., 2./)
     F(8,:) = (/0., 0., 0., 0., 0., 3., 4., 5., 6./)
     F(9,:) = (/0., 0., 0., 0., 0., 7., 8., 9., 1./)
     
     
-!     E = GatherRow(F)
-!     call OneStepGaussElimination(E)
-!     C = Unpaking(E)
-!     
-!     do i = 1, 9
-!         print*, C(i,:)        
-!     enddo
-!     
+    E = GatherRow(B)
+    call OneStepGaussElimination(E)
+    C = Unpaking(E)
+    
+    do i = 1, 5
+        print*, C(i,:)        
+    enddo
+    
 !     do i = 1, 9
 !         do j = 1, 9
 !             if (C(i,j) .ne. 0) then
@@ -52,8 +52,8 @@ program main
 !     print*
 !     print*, NonZero
 
-    G = GatherCol(A)
-    Pivo = MinFillin(G)
+!     G = GatherCol(A)
+!     Pivo = MinFillin(G)
     contains
 
     !================================================================================================
@@ -66,7 +66,7 @@ program main
         type(ColPacked) :: B
         type(Pivot) :: Pivo
         integer :: Criterio, i, j, n
-        real :: Mult=1.d0, ValPivo = 0
+        real :: Mult=1.d0
         
         call system("clear")
         n = size(A%Len_Row)
@@ -94,22 +94,22 @@ program main
             print*, "Erro: Digitou uma opcao invalida"
             return
         endif
-        print*, pivo%row , pivo%col
+        print*, pivo%row , pivo%col, Pivo%Value
         print*
-        do i = 1, A%Len_Row(Pivo%Row)
-            if (A%Col_Index(A%Row_Start(Pivo%Row)+i-1) .eq. Pivo%Col) then
-                ValPivo = A%Value(A%Row_Start(Pivo%Row)+i-1)
-                exit
-            endif
-        enddo
+!         do i = 1, A%Len_Row(Pivo%Row)
+!             if (A%Col_Index(A%Row_Start(Pivo%Row)+i-1) .eq. Pivo%Col) then
+!                 ValPivo = A%Value(A%Row_Start(Pivo%Row)+i-1)
+!                 exit
+!             endif
+!         enddo
                     
         call row_perm_rowpacked(A,1,Pivo%Row)
         call col_perm_rowpacked(A,1,Pivo%Col)
         
         do i = 2, n
             do j = 1, A%Len_Row(i)
-                if (A%Col_Index(A%Row_Start(i)+j-1) .eq. ValPivo) then
-                    Mult = ValPivo / A%Value(A%Row_Start(i)+j-1)
+                if (A%Col_Index(A%Row_Start(i)+j-1) .eq. Pivo%Value) then
+                    Mult = Pivo%Value / A%Value(A%Row_Start(i)+j-1)
                     call RowSumColPacked(A,i,1,-Mult,w)
                 endif                        
             enddo

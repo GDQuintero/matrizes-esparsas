@@ -28,6 +28,7 @@ module gustavo
     
     type Pivot
         integer :: Row, Col
+        real :: Value
     end type
     
     real :: VectorDensity = 0.25, MatrixDensity = 0.6
@@ -399,7 +400,7 @@ module gustavo
         enddo
         
         if (j .eq. 1) then
-            !MinDeg%Value = A%Value(A%Row_Start(ind(1)))
+            MinDeg%Value = A%Value(A%Row_Start(ind(1)))
             MinDeg%Row = ind(1)
             MinDeg%Col = MinDeg%Row
             return
@@ -417,7 +418,7 @@ module gustavo
             do j = 1, rk
                 akj = A%Value(A%Row_Start(ind(i)) + j - 1)
                 if (A%Col_Index(A%Row_Start(ind(i)) + j - 1) .ne. ind(i) .and. abs(akk) .ge. u*abs(akj)) then
-                    !MinDeg%Value = akk
+                    MinDeg%Value = akk
                     MinDeg%Row = ind(i)
                     MinDeg%Col = MinDeg%Row
                     return
