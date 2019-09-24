@@ -97,24 +97,74 @@ program main
         print*, pivo%row , pivo%col
         print*
         do i = 1, A%Len_Row(Pivo%Row)
-                if (A%Col_Index(A%Row_Start(Pivo%Row)+i-1) .eq. Pivo%Col) then
-                    ValPivo = A%Value(A%Row_Start(Pivo%Row)+i-1)
-                    exit
+            if (A%Col_Index(A%Row_Start(Pivo%Row)+i-1) .eq. Pivo%Col) then
+                ValPivo = A%Value(A%Row_Start(Pivo%Row)+i-1)
+                exit
+            endif
+        enddo
+                    
+        call row_perm_rowpacked(A,1,Pivo%Row)
+        call col_perm_rowpacked(A,1,Pivo%Col)
+        
+        do i = 2, n
+            do j = 1, A%Len_Row(i)
+                if (A%Col_Index(A%Row_Start(i)+j-1) .eq. ValPivo) then
+                    Mult = ValPivo / A%Value(A%Row_Start(i)+j-1)
+                    call RowSumColPacked(A,i,1,-Mult,w)
+                endif                        
+            enddo
+        enddo
+        
+    end subroutine OneStepGaussElimination
+    
+    !================================================================================================
+    !  MIN FILL-IN (Forma ColPacked)
+    !================================================================================================
+    function MinFillin(A)
+        implicit none
+        
+        integer :: i, j, k=0, n, l=0
+        type(ColPacked) :: A
+        type(RowPacked) :: aux
+        type(Pivot) :: MinFillin
+        type(EntryPacked) :: Pivos
+        real :: Mult
+        
+        n = size(A%Len_Col); aux = PackColRow(A)
+        
+        !Alocamos o type contendo os possiveis pivos
+        allocate(Pivos%Row_Index(n*n),Pivos%Col_Index(n*n),Pivos%Value(n*n))
+        
+        !Procuramos os pivos candidatos
+        do i = 1, n
+            do j = A%Col_Start(i), A%Col_Start(i) + A%Len_Col(i) - 1
+                if (abs(A%Value(j)) .ge. u*maxval(abs(A%Value(A%Col_Start(i):A%Col_Start(i) + A%Len_Col(i) - 1)))) then
+                    l = l + 1
+                    Pivos%Row_Index(l) = A%Row_Index(j)
+                    Pivos%Col_Index(l) = i
+                    Pivos%Value(l) = A%Value(j)
                 endif
             enddo
-                        
-            call row_perm_rowpacked(A,1,Pivo%Row)
-            call col_perm_rowpacked(A,1,Pivo%Col)
+        enddo
+!         print*, Pivos%Row_Index(1:l)
+!         print*, Pivos%Col_Index(1:l)
+!         print*, Pivos%Value(1:l)
+        
+        do k = 1, 1
+            call row_perm_rowpacked(aux,1,Pivos%Row_Index(k))
+            call col_perm_rowpacked(aux,1,Pivos%Col_Index(k))
             
             do i = 2, n
-                do j = 1, A%Len_Row(i)
-                    if (A%Col_Index(A%Row_Start(i)+j-1) .eq. ValPivo) then
-                        Mult = ValPivo / A%Value(A%Row_Start(i)+j-1)
-                        call RowSumColPacked(A,i,1,-Mult,w)
+                print*, aux%Len_Row(i)
+                do j = 1, aux%Len_Row(i)
+                    if (aux%Col_Index(aux%Row_Start(i)+j-1) .eq. Pivos%Value(k)) then
+                        Mult = Pivos%Value(k) / aux%Value(aux%Row_Start(i)+j-1)
+!                         call RowSumColPacked(aux,i,1,-Mult,w)
                     endif                        
                 enddo
             enddo
-        
-    end subroutine OneStepGaussElimination
+!             print*, aux%Len_Row
+        enddo
+    end function MinFillin
     
 end program
