@@ -5,6 +5,7 @@ program main
     real, dimension(5,5) :: A, B
     real, dimension(9,9) :: F, C
     type(RowPacked) :: D, E
+    type(ColPacked) :: G
     type(Pivot) :: Pivo
     real, dimension(5) :: w
     integer :: NonZero = 0
@@ -32,16 +33,27 @@ program main
     F(8,:) = (/0., 0., 0., 0., 0., 3., 4., 5., 6./)
     F(9,:) = (/0., 0., 0., 0., 0., 7., 8., 9., 1./)
     
-    E = GatherRow(F)
-    call OneStepGaussElimination(E)
-    C = Unpaking(E)
     
-    do i = 1, 9
-        print*, C(i,:)
-        NonZero = NonZero + E%Len_Row(i)
-    enddo
-    print*
-    print*, NonZero
+!     E = GatherRow(F)
+!     call OneStepGaussElimination(E)
+!     C = Unpaking(E)
+!     
+!     do i = 1, 9
+!         print*, C(i,:)        
+!     enddo
+!     
+!     do i = 1, 9
+!         do j = 1, 9
+!             if (C(i,j) .ne. 0) then
+!                 NonZero = NonZero + 1
+!             endif
+!         enddo
+!     enddo
+!     print*
+!     print*, NonZero
+
+    G = GatherCol(A)
+    Pivo = MinFillin(G)
     contains
 
     !================================================================================================

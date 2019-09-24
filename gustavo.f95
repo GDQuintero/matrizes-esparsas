@@ -427,4 +427,35 @@ module gustavo
         
     end function MinDeg
     
+    !================================================================================================
+    !  MIN FILL-IN (Forma ColPacked)
+    !================================================================================================
+    function MinFillin(A)
+        implicit none
+        
+        integer :: i, j, k, n, l=0
+        type(ColPacked) :: A
+        type(Pivot) :: MinFillin
+        type(EntryPacked) :: Pivos
+        
+        n = size(A%Len_Col)
+        
+        !Alocamos o type contendo os possiveis pivos
+        allocate(Pivos%Row_Index(n*n),Pivos%Col_Index(n*n),Pivos%Value(n*n))
+        
+        !Procuramos os pivos candidatos
+        do i = 1, n
+            do j = A%Col_Start(i), A%Col_Start(i) + A%Len_Col(i) - 1
+                if (abs(A%Value(j)) .ge. u*maxval(abs(A%Value(A%Col_Start(i):A%Col_Start(i) + A%Len_Col(i) - 1)))) then
+                    l = l + 1
+                    Pivos%Row_Index(l) = A%Row_Index(j)
+                    Pivos%Col_Index(l) = i
+                    Pivos%Value(l) = A%Value(j)
+                endif
+            enddo
+        enddo
+        print*, Pivos%Row_Index(1:l)
+        print*, Pivos%Col_Index(1:l)
+        print*, Pivos%Value(1:l)
+    end function MinFillin
 end module
