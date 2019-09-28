@@ -301,9 +301,35 @@ module daniel
 				if(bool) then
 					MinRowInMinCol%col = j	
 					MinRowInMinCol%row = i
+					MinRowInMinCol%value = A%value(i)
 					return
 				endif
 			endif
 		enddo
+	end function
+!================================================================================================
+!     IMPRIMIENDO MATRIZ EMPAQUETADA
+!================================================================================================  
+    function printf(A)
+        implicit none
+        type(colpacked) :: A
+        character(len = 3), allocatable :: printf(:,:)
+        integer :: i, j, n
+        n = size(A%len_col)
+        allocate(printf(n,n))
+        printf = "   "
+        do j = 1, n
+            do i = A%col_start(j), A%col_start(j+1)-1
+                if(abs(A%value(i)) .ge. 10e-8) then
+                    printf(A%row_index(i),j) = " x "
+                else
+                    printf(A%row_index(i),j) = "   "
+                endif
+            enddo
+        enddo
+        
+        do i = 1, n
+            print*, "|", printf(i,:), "|"
+        enddo
 	end function
 end module
