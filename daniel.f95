@@ -256,6 +256,8 @@ module daniel
                             Markowitz%row = i
                             Markowitz%value = A%value(k-1)
                             return!que acontece cuando no consigue ni un pivo numericamente estable? que valor retorna?
+                        else 
+                            print*, "o pivo candidato nao satisfaz threshold pivoting"
                         endif
                     endif
                 enddo
