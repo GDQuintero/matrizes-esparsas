@@ -217,7 +217,7 @@ module daniel
                     return
                 elseif(lrow(i) == 1) then
                     do j = 1, n
-                        do k = A%col_start(j), A%col_start(j+1) 
+                        do k = A%col_start(j), A%col_start(j+1)-1!ultima modificacion 
                             if(A%row_index(k) == i) then
                                 Markowitz%col = j
                                 Markowitz%row = i
