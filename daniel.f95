@@ -214,6 +214,7 @@ module daniel
                 if(A%len_col(i) == 1) then
                     Markowitz%col = i
                     Markowitz%row = A%row_index(A%col_start(i))
+                    Markowitz%value = A%value(A%col_start(i))
                     return
                 elseif(lrow(i) == 1) then
                     do j = 1, n
@@ -221,6 +222,7 @@ module daniel
                             if(A%row_index(k) == i) then
                                 Markowitz%col = j
                                 Markowitz%row = i
+                                Markowitz%value = A%value(k)
                                 return
                             endif
                         enddo
@@ -252,6 +254,7 @@ module daniel
                         if(bool) then
                             Markowitz%col = j
                             Markowitz%row = i
+                            Markowitz%value = A%value(k-1)
                             return!que acontece cuando no consigue ni un pivo numericamente estable? que valor retorna?
                         endif
                     endif
