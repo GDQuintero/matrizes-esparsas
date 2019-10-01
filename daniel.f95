@@ -205,10 +205,16 @@ module daniel
 		do i = 1, tau
             lrow(A%row_index(i)) = lrow(A%row_index(i)) + 1
 		enddo
-		do i = 1, n
-            aux(i,:) = (lrow(i)-1)*(A%len_col-1)
+! 		do i = 1, n
+!             aux(i,:) = (lrow(i)-1)*(A%len_col-1)
+! 		enddo
+! 		min_prod = minval(aux)
+		min_prod = (lrow(A%row_index(1))-1)*(A%len_col(1)-1)
+		do j = 1, n ! ordem tau
+            do k = A%col_start(j), A%col_start(j+1)-1
+                min_prod = min(min_prod, (lrow(A%row_index(k))-1)*(A%len_col(j)-1))
+            enddo
 		enddo
-		min_prod = minval(aux)
 		if(min_prod == 0) then
             do i = 1, n
                 if(A%len_col(i) == 1) then
