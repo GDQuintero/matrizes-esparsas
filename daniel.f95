@@ -193,14 +193,14 @@ module daniel
 		implicit none
 		type(pivot) :: Markowitz
 		type(ColPacked) :: A
-		integer, allocatable :: aux(:,:), lrow(:)!lrow es un vector auxiliar interno
-		real, parameter :: u = 0.25!threshold pivoting
+		integer, allocatable :: lrow(:)!lrow es un vector auxiliar interno !!!aux(:,:), 
+! 		real, parameter :: u = 0.25!threshold pivoting
 		integer :: i, j, k, l, n, tau, min_prod
 		logical :: bool
 		real :: r
 		n = size(A%len_col)!numero das colunas de A
-		tau = size(A%row_index)
-		allocate(aux(n,n), lrow(n))
+		tau = size(A%row_index)! numero de entradas nao nulas
+		allocate(lrow(n))!aux(n,n), 
 		lrow = 0
 		do i = 1, tau
             lrow(A%row_index(i)) = lrow(A%row_index(i)) + 1
@@ -223,8 +223,8 @@ module daniel
                     Markowitz%value = A%value(A%col_start(i))
                     return
                 elseif(lrow(i) == 1) then
-                    do j = 1, n
-                        do k = A%col_start(j), A%col_start(j+1)-1!ultima modificacion 
+                    do j = 1, n ! total ordem tau
+                        do k = A%col_start(j), A%col_start(j+1)-1!orden del tamano de la columna j
                             if(A%row_index(k) == i) then
                                 Markowitz%col = j
                                 Markowitz%row = i
@@ -237,34 +237,40 @@ module daniel
             enddo
         else
             do j = 1, n
-                do i = 1, n
-                    if(aux(i,j) == min_prod) then
-                        k = A%col_start(j)
-                        bool = .true.
-                        do while(bool .and. k < A%col_start(j+1))
-                            if(A%row_index(k) == i) then 
-                                r = abs(A%value(k))
-                                bool = .false.
-                            endif
-                            k = k + 1
-                        enddo
-                        l = A%col_start(j)
-                        bool = .true.
-                        do while(bool .and. l < A%col_start(j+1) .and. l /= (k-1))!threshold pivoting
-                            if(r < u*abs(A%value(l))) then
-                                bool = .false.
-                                exit!dale una revisada daniel del furuto
-                            endif
-                            l = l + 1
-                        enddo
-                        if(bool) then
-                            Markowitz%col = j
-                            Markowitz%row = i
-                            Markowitz%value = A%value(k-1)
-                            return!que acontece cuando no consigue ni un pivo numericamente estable? que valor retorna?
-                        else 
-                            print*, "o pivo candidato nao satisfaz threshold pivoting"
-                        endif
+                do k = A%col_start(j), A%col_start(j+1)-1!i = 1, n de nuevo orden tau
+                    if ((lrow(A%row_index(k))-1)*(A%len_col(j)-1) == min_prod .and. threshold(A,j,k)) then
+                        Markowitz%col = j
+                        Markowitz%row = A%row_index(k)
+                        Markowitz%value = A%value(k)
+                        return
+!                     if(aux(i,j) == min_prod) then
+!                         k = A%col_start(j)!esta parte solo localiza la entrada que minimiza Markowitz
+!                         bool = .true.
+!                         do while(bool .and. k < A%col_start(j+1))
+!                             if(A%row_index(k) == i) then 
+!                                 r = abs(A%value(k))
+!                                 bool = .false.
+!                             endif
+!                             k = k + 1
+!                         enddo
+!                         l = A%col_start(j)
+!                         bool = .true.
+!                         do while(bool .and. l < A%col_start(j+1) .and. l /= (k-1))!threshold pivoting
+!                             if(r < u*abs(A%value(l))) then
+!                                 bool = .false.
+!                                 exit!dale una revisada daniel del furuto
+!                             endif
+!                             l = l + 1
+!                         enddo
+!                         if(bool) then
+!                             Markowitz%col = j
+!                             Markowitz%row = i
+!                             Markowitz%value = A%value(k-1)
+!                             return!que acontece cuando no consigue ni un pivo numericamente estable? que valor retorna?
+!                         else 
+!                             print*, "o pivo candidato nao satisfaz threshold pivoting"
+!                         endif
+!                     endif
                     endif
                 enddo
             enddo
@@ -343,4 +349,23 @@ module daniel
             print*, "|", printf(i,:), "|"
         enddo
 	end function
+!================================================================================================
+!     THRESHOLD PIVOTING
+!================================================================================================
+    function threshold(A,j,k)!k está na coluna j da matriz empacotada A
+        implicit none
+        type(colpacked) :: A
+        integer :: j, k, i
+        logical :: threshold
+        real :: r, u = 0.1
+        threshold = .true.
+        r = abs(A%value(k))
+        i = A%col_start(j)
+        do while(threshold .and. i < A%col_start(j+1))
+            if(r < u*abs(A%value(i))) then
+                threshold = .false.
+            endif
+            i = i+1
+        enddo
+    end function
 end module
