@@ -243,6 +243,8 @@ module daniel
                         Markowitz%row = A%row_index(k)
                         Markowitz%value = A%value(k)
                         return
+                    else 
+                        exit
 !                     if(aux(i,j) == min_prod) then
 !                         k = A%col_start(j)!esta parte solo localiza la entrada que minimiza Markowitz
 !                         bool = .true.
