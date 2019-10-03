@@ -199,7 +199,7 @@ module daniel
 		real :: r
 		n = size(A%len_col)!numero das colunas de A
 		tau = size(A%row_index)! numero de entradas nao nulas
-		allocate(lrow(n))!aux(n,n), 
+! 		allocate(lrow(n))!aux(n,n), 
 		lrow = lenrow(A)
 ! 		do i = 1, tau
 !             lrow(A%row_index(i)) = lrow(A%row_index(i)) + 1
@@ -355,11 +355,13 @@ module daniel
     function minrow(A, j)
         implicit none
         type(colpacked) :: A
-        integer :: i, j, k, minrow
+        integer :: i, j, k, minrow!, lrow(:)
+        integer, allocatable :: lrow(:)
         k = A%col_start(j)
-        minrow = lenrow(A%row_index(k))
+        lrow = lenrow(A)
+        minrow = lrow(A%row_index(k))
         do i = k+1, A%col_start(j+1)-1
-            minrow = min(minrow, lenrow(A%row_index(i)))
+            minrow = min(minrow, lrow(A%row_index(i)))
         enddo
     end function
 !================================================================================================
@@ -368,7 +370,7 @@ module daniel
     function lenrow(A)
         implicit none
         type(colpacked) :: A
-        integer, allocatable :: lenrow
+        integer, allocatable :: lenrow(:)
         integer :: n, i, tau
         n = size(A%len_col)
         tau = size(A%row_index)
@@ -384,9 +386,11 @@ module daniel
     function minprod(A)
         implicit none
         type(colpacked) :: A
-        integer :: minprod, j, k, tau, n
+        integer :: minprod, j, k, tau, n!, lrow(:)
+        integer, allocatable :: lrow(:)
         n = size(A%len_col)
         tau = size(A%row_index)
+        lrow = lenrow(A)
 		minprod = (lrow(A%row_index(1))-1)*(A%len_col(1)-1)
 		do j = 1, n ! ordem tau
             do k = A%col_start(j), A%col_start(j+1)-1
