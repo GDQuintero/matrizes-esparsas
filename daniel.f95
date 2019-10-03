@@ -193,28 +193,24 @@ module daniel
 		implicit none
 		type(pivot) :: Markowitz
 		type(ColPacked) :: A
-		integer, allocatable :: lrow(:)!lrow es un vector auxiliar interno !!!aux(:,:), 
-! 		real, parameter :: u = 0.25!threshold pivoting
+		integer, allocatable :: lrow(:)!lrow es un vector auxiliar interno !!!aux(:,:),
 		integer :: i, j, k, l, n, tau, min_prod
 		logical :: bool
 		real :: r
 		n = size(A%len_col)!numero das colunas de A
 		tau = size(A%row_index)! numero de entradas nao nulas
 		allocate(lrow(n))!aux(n,n), 
-		lrow = 0
-		do i = 1, tau
-            lrow(A%row_index(i)) = lrow(A%row_index(i)) + 1
-		enddo
-! 		do i = 1, n
-!             aux(i,:) = (lrow(i)-1)*(A%len_col-1)
+		lrow = lenrow(A)
+! 		do i = 1, tau
+!             lrow(A%row_index(i)) = lrow(A%row_index(i)) + 1
 ! 		enddo
-! 		min_prod = minval(aux)
-		min_prod = (lrow(A%row_index(1))-1)*(A%len_col(1)-1)
-		do j = 1, n ! ordem tau
-            do k = A%col_start(j), A%col_start(j+1)-1
-                min_prod = min(min_prod, (lrow(A%row_index(k))-1)*(A%len_col(j)-1))
-            enddo
-		enddo
+! 		min_prod = (lrow(A%row_index(1))-1)*(A%len_col(1)-1)
+! 		do j = 1, n ! ordem tau
+!             do k = A%col_start(j), A%col_start(j+1)-1
+!                 min_prod = min(min_prod, (lrow(A%row_index(k))-1)*(A%len_col(j)-1))
+!             enddo
+! 		enddo
+        min_prod = minprod(A)
 		if(min_prod == 0) then
             do i = 1, n
                 if(A%len_col(i) == 1) then
@@ -245,34 +241,6 @@ module daniel
                         return
                     else 
                         exit
-!                     if(aux(i,j) == min_prod) then
-!                         k = A%col_start(j)!esta parte solo localiza la entrada que minimiza Markowitz
-!                         bool = .true.
-!                         do while(bool .and. k < A%col_start(j+1))
-!                             if(A%row_index(k) == i) then 
-!                                 r = abs(A%value(k))
-!                                 bool = .false.
-!                             endif
-!                             k = k + 1
-!                         enddo
-!                         l = A%col_start(j)
-!                         bool = .true.
-!                         do while(bool .and. l < A%col_start(j+1) .and. l /= (k-1))!threshold pivoting
-!                             if(r < u*abs(A%value(l))) then
-!                                 bool = .false.
-!                                 exit!dale una revisada daniel del furuto
-!                             endif
-!                             l = l + 1
-!                         enddo
-!                         if(bool) then
-!                             Markowitz%col = j
-!                             Markowitz%row = i
-!                             Markowitz%value = A%value(k-1)
-!                             return!que acontece cuando no consigue ni un pivo numericamente estable? que valor retorna?
-!                         else 
-!                             print*, "o pivo candidato nao satisfaz threshold pivoting"
-!                         endif
-!                     endif
                     endif
                 enddo
             enddo
@@ -285,44 +253,55 @@ module daniel
 		type(pivot) :: MinRowInMinCol
 		type(ColPacked) :: A
 		integer :: i, j, k, l, m, n, min_row, min_col, tau
-		integer, allocatable :: len_row(:)
+		integer, allocatable :: lrow(:)
 		logical :: bool
-		real, parameter :: u = 0.25!threshold pivoting
+! 		real, parameter :: u = 0.25!threshold pivoting
 		n = size(A%len_col)
 		tau = size(A%row_index)
-		allocate(len_row(n))
-		len_row = 0!tal vez innecesario
-		do i = 1, tau ! creamos el vector len_row
-            len_row(A%row_index(i)) = len_row(A%row_index(i)) + 1
-		enddo
+		lrow = lenrow(A)
+! 		allocate(len_row(n))
+! 		len_row = 0!tal vez innecesario
+! 		do i = 1, tau ! creamos el vector len_row
+!             len_row(A%row_index(i)) = len_row(A%row_index(i)) + 1
+! 		enddo
 		min_col = minval(A%len_col)
 		do j = 1, n
 			if(A%len_col(j) == min_col) then
-				if(len_row(A%row_index(A%col_start(j))) .le. len_row(A%row_index(A%col_start(j)+1))) then!las primeras 2 entradas de la col j
-					i = A%row_index(A%col_start(j))
-				else
-					i = A%row_index(A%col_start(j)+1)
-				endif
-				do k = A%col_start(j)+2, A%col_start(j+1)-1
-					if(len_row(A%row_index(k)) < len_row(i)) then! .and. (abs(A%value(k)) .ge. u*abs(A%value(k+1)))) then
-						i = A%row_index(k)
-					endif
-				enddo
-				l = A%col_start(j)
-				bool = .true.
-				do while(bool .and. l < A%col_start(j+1))!threshold pivoting
-					if(abs(A%value(i)) < u*abs(A%value(l))) then
-						bool = .false.
-						exit!dale una revisada daniel del furuto
-					endif
-					l = l + 1
-				enddo
-				if(bool) then
-					MinRowInMinCol%col = j	
-					MinRowInMinCol%row = i
-					MinRowInMinCol%value = A%value(i)
-					return
-				endif
+                do k = A%col_start(j), A%col_start(j+1)-1
+                    if(lrow(A%row_index(k)) == minrow(A,j) .and. threshold(A, j, k)) then
+                        MinRowInMinCol%row = A%row_index(k)
+                        MinRowInMinCol%col = j
+                        MinRowInMinCol%value = A%value(k)
+                        return
+                    else
+                        exit
+                    endif
+                enddo 
+! 				if(len_row(A%row_index(A%col_start(j))) .le. len_row(A%row_index(A%col_start(j)+1))) then!las primeras 2 entradas de la col j
+! 					i = A%row_index(A%col_start(j))
+! 				else
+! 					i = A%row_index(A%col_start(j)+1)
+! 				endif
+! 				do k = A%col_start(j)+2, A%col_start(j+1)-1
+! 					if(len_row(A%row_index(k)) < len_row(i)) then! .and. (abs(A%value(k)) .ge. u*abs(A%value(k+1)))) then
+! 						i = A%row_index(k)
+! 					endif
+! 				enddo
+! 				l = A%col_start(j)
+! 				bool = .true.
+! 				do while(bool .and. l < A%col_start(j+1))!threshold pivoting
+! 					if(abs(A%value(i)) < u*abs(A%value(l))) then
+! 						bool = .false.
+! 						exit!dale una revisada daniel del futuro
+! 					endif
+! 					l = l + 1
+! 				enddo
+! 				if(bool) then
+! 					MinRowInMinCol%col = j	
+! 					MinRowInMinCol%row = i
+! 					MinRowInMinCol%value = A%value(i)
+! 					return
+! 				endif
 			endif
 		enddo
 	end function
@@ -332,7 +311,7 @@ module daniel
     function printf(A)
         implicit none
         type(colpacked) :: A
-        character(len = 3), allocatable :: printf(:,:)
+        character(len=3), allocatable :: printf(:,:)
         integer :: i, j, n
         n = size(A%len_col)
         allocate(printf(n,n))
@@ -359,7 +338,7 @@ module daniel
         type(colpacked) :: A
         integer :: j, k, i
         logical :: threshold
-        real :: r, u = 0.1
+        real :: r, u = 0.1!preestablecido
         threshold = .true.
         r = abs(A%value(k))
         i = A%col_start(j)
@@ -369,5 +348,50 @@ module daniel
             endif
             i = i+1
         enddo
+    end function
+!================================================================================================
+!     MIN ROW
+!================================================================================================
+    function minrow(A, j)
+        implicit none
+        type(colpacked) :: A
+        integer :: i, j, k, minrow
+        k = A%col_start(j)
+        minrow = lenrow(A%row_index(k))
+        do i = k+1, A%col_start(j+1)-1
+            minrow = min(minrow, lenrow(A%row_index(i)))
+        enddo
+    end function
+!================================================================================================
+!     LENROW
+!================================================================================================
+    function lenrow(A)
+        implicit none
+        type(colpacked) :: A
+        integer, allocatable :: lenrow
+        integer :: n, i, tau
+        n = size(A%len_col)
+        tau = size(A%row_index)
+        allocate(lenrow(n))
+        lenrow = 0
+		do i = 1, tau
+            lenrow(A%row_index(i)) = lenrow(A%row_index(i)) + 1
+		enddo
+    end function
+!================================================================================================
+!     MINPROD
+!================================================================================================
+    function minprod(A)
+        implicit none
+        type(colpacked) :: A
+        integer :: minprod, j, k, tau, n
+        n = size(A%len_col)
+        tau = size(A%row_index)
+		minprod = (lrow(A%row_index(1))-1)*(A%len_col(1)-1)
+		do j = 1, n ! ordem tau
+            do k = A%col_start(j), A%col_start(j+1)-1
+                minprod = min(minprod, (lrow(A%row_index(k))-1)*(A%len_col(j)-1))
+            enddo
+		enddo
     end function
 end module
