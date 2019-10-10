@@ -372,34 +372,35 @@ module gustavo
     !================================================================================================
     ! CRITERIO DE GRADO MINIMO
     !================================================================================================
-    function MinDeg(A,p,ind)
+    function MinDeg(A,P,ind)
         implicit none
         
-        integer :: i = 0, r_i = 0
+        integer :: i = 0, r_min = 0
         type(RowPacked) :: A
         type(Pivot) :: MinDeg
-        integer :: p(:), ind
+        integer :: P(:), ind
         
-        !Escojemos la primera fila no ignorada que aparece en el vector p
-        r_i = A%Len_Row(p(ind+1))
-        MinDeg%Row = p(ind+1)
+        !Escojemos la primera fila no ignorada que aparece en el vector P
+        r_min = A%Len_Row(P(ind+1))
+        MinDeg%Row = P(ind+1)
         MinDeg%Col = MinDeg%Row
         
         !Buscamos min r_i, y seleccionmos el elemento diagonal como pivote
         do i = ind+2, size(A%Len_Row)
-            if (A%Len_Row(p(i)) .lt. r_i) then
-                r_i = A%Len_Row(p(i))
+            if (A%Len_Row(P(i)) .lt. r_min) then
+                r_min = A%Len_Row(P(i))
                 MinDeg%Row = i
-                MinDeg%Col = i
+                MinDeg%Col = MinDeg%Row
             endif
         enddo
         
         !Buscamos el valor del pivote
-        do i = 1, r_i
+        do i = 1, r_min
             if (A%Col_Index(A%Row_Start(MinDeg%Row)+i-1) .eq. MinDeg%Row) then
                 MinDeg%Value = A%Value(A%Row_Start(MinDeg%Row)+i-1)
             endif
         enddo
+        
     end function MinDeg
     
 end module

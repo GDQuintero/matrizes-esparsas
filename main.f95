@@ -8,9 +8,9 @@ program main
     type(ColPacked) :: G
     type(Pivot) :: Pivo
     real, dimension(9) :: w
-    integer, dimension(9) :: p
+    integer, dimension(9) :: P
     integer :: NonZero = 0
-    w = 0.; p = (/5, 2, 3, 4, 1, 6, 7, 8, 9/)
+    w = 0.; P = (/1, 2, 3, 4, 5, 6, 7, 8, 9/)
     
     A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
     A(2,:) = (/2.d0, 0.d0, -2.d0, 0.d0, 3.d0/)
@@ -44,9 +44,7 @@ program main
 !     enddo
 !     print* 
 !     print*, E%Len_Row
-
-    pivo = MinDeg(E,p,5)
-    print*, pivo%row, pivo%col, pivo%Value
+    call GaussElimination(E,p)
     
 
     contains
@@ -54,50 +52,46 @@ program main
     !================================================================================================
     ! UM PASSO DA ELIMINACAO DE GAUSS USANDO PIVOTAMENTO LOCAL
     !================================================================================================
-    subroutine OneStepGaussElimination(A)
+    subroutine GaussElimination(A,P)
         implicit none
         
         type(RowPacked) :: A
-        type(ColPacked) :: B
         type(Pivot) :: Pivo
-        integer :: Criterio, i, j, n
+        integer :: P(:), Criterio, i, j, k, n, ind = 0
+        integer, allocatable :: tmp(:)
         real :: Mult=1.d0
         
         call system("clear")
-        n = size(A%Len_Row)
+        n = size(A%Len_Row); allocate(tmp(size(p)))
         print*, "Escolha uma estrategia de Pivotamento Local (digite apenas o numero): "
         print*, "1: Grau minimo"
         print*, "2: Minimum Fill-in"
         read*, Criterio
         
         if (Criterio .eq. 1) then
-            call system("clear")
-!             Pivo = MinDeg(A)
-            
-        elseif (Criterio .eq. 2) then
-            call system("clear")
-!             Pivo = MinDeg(A)
-        
+            do i = 1, 1
+                Pivo = MinDeg(A,P,ind)!Calculamos el pivote
+                ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
+                tmp = P
+                P(ind) = Pivo%Row
+                P(Pivo%Row) = tmp(ind)!Hasta aqui solo para guardar la permutacion
+                
+                do j = ind+1, n
+                    do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))
+                        if (A%Col_Index(k) .eq. Pivo%Row) then
+                            print*, j
+                        endif
+                    enddo
+                enddo
+            enddo           
         else
-            print*, "Erro: Digitou uma opcao invalida"
+            call system("clear")
+            print*, "Ainda nao foi implementado!!!"
             return
         endif
-        print*, pivo%row , pivo%col, Pivo%Value
-        print*
-                    
-        call row_perm_rowpacked(A,1,Pivo%Row)
-        call col_perm_rowpacked(A,1,Pivo%Col)
         
-        do i = 2, n
-            do j = 1, A%Len_Row(i)
-                if (A%Col_Index(A%Row_Start(i)+j-1) .eq. Pivo%Value) then
-                    Mult = Pivo%Value / A%Value(A%Row_Start(i)+j-1)
-                    call RowSumColPacked(A,i,1,-Mult,w)
-                endif                        
-            enddo
-        enddo
-        
-    end subroutine OneStepGaussElimination
+
+    end subroutine GaussElimination
     
     !================================================================================================
     !  MIN FILL-IN (Forma ColPacked)
