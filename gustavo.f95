@@ -303,7 +303,7 @@ module gustavo
     ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS (alpha*x + y)
     !================================================================================================
     
-    subroutine RowSumColPacked(A,ind1,ind2,alpha,w)
+    subroutine RowSumRowPacked(A,ind1,ind2,alpha,w)
         implicit none
         
         integer :: ind1, ind2, i, j, n, m, zeros, k, NonZero
@@ -367,7 +367,7 @@ module gustavo
         endif
         A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
         A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
-    end subroutine RowSumColPacked
+    end subroutine RowSumRowPacked
     
     !================================================================================================
     ! CRITERIO DE GRADO MINIMO
@@ -375,57 +375,30 @@ module gustavo
     function MinDeg(A)
         implicit none
         
-        integer :: i=0, j=0, k=0, l=0, rk=0, n=0
-        integer, allocatable :: ind(:)
+        integer :: i = 0, r_i = 0
         type(RowPacked) :: A
-        type(Pivot) :: MinDeg  
-        real :: akj, akk
+        type(Pivot) :: MinDeg
         
-        rk = minval(A%Len_Row); n = size(A%Len_Row); j = 0; k = 0; l = 0
+        !Contamos los elementos no nulos de la primera fila
+        r_i = A%Len_Row(1)
+        MinDeg%Row = 1
+        MinDeg%Col = 1
         
-        do i = 1, n
-            if (A%Len_Row(i) .eq. rk) then
-                l = l + 1
+        !Buscamos min r_i, y seleccionmos el elemento diagonal como pivote
+        do i = 2, size(A%Len_Row)
+            if (A%Len_Row(i) .lt. r_i) then
+                r_i = A%Len_Row(i)
+                MinDeg%Row = i
+                MinDeg%Col = i
             endif
         enddo
         
-        allocate(ind(l))
-        
-        do i = 1, n
-            j = j + 1
-            if (A%Len_Row(i) .eq. rk) then
-                k = k + 1
-                ind(k) = j
-            endif 
+        !Buscamos el valor del pivote
+        do i = 1, r_i
+            if (A%Col_Index(A%Row_Start(MinDeg%Row)+i-1) .eq. MinDeg%Row) then
+                MinDeg%Value = A%Value(A%Row_Start(MinDeg%Row)+i-1)
+            endif
         enddo
-        
-        if (j .eq. 1) then
-            MinDeg%Value = A%Value(A%Row_Start(ind(1)))
-            MinDeg%Row = ind(1)
-            MinDeg%Col = MinDeg%Row
-            return
-        endif
-        
-        k = 0; j = 0
-        
-        do i = 1, l
-            do k = 1, rk
-                if (A%Col_Index(A%Row_Start(ind(i)) + k - 1) .eq. ind(i)) then
-                    akk = A%Value(A%Row_Start(ind(i)) + k - 1)
-                    exit
-                endif
-            enddo
-            do j = 1, rk
-                akj = A%Value(A%Row_Start(ind(i)) + j - 1)
-                if (A%Col_Index(A%Row_Start(ind(i)) + j - 1) .ne. ind(i) .and. abs(akk) .ge. u*abs(akj)) then
-                    MinDeg%Value = akk
-                    MinDeg%Row = ind(i)
-                    MinDeg%Col = MinDeg%Row
-                    return
-                endif
-            enddo
-        enddo
-        
     end function MinDeg
     
 end module

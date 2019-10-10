@@ -7,9 +7,9 @@ program main
     type(RowPacked) :: D, E
     type(ColPacked) :: G
     type(Pivot) :: Pivo
-    real, dimension(5) :: w
+    real, dimension(9) :: w
     integer :: NonZero = 0
-    w = 0.d0
+    w = 0.
     
     A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
     A(2,:) = (/2.d0, 0.d0, -2.d0, 0.d0, 3.d0/)
@@ -27,33 +27,27 @@ program main
     F(2,:) = (/5., 6., 7., 8., 0., 0., 0., 0., 0./)
     F(3,:) = (/9., 1., 2., 3., 0., 0., 0., 0., 0./)
     F(4,:) = (/4., 5., 6., 7., 8., 0., 0., 0., 0./)
-    F(5,:) = (/0., 0., 0., 9., 4., 2., 0., 0., 0./)
+    F(5,:) = (/0., 0., 0., 9., 1., 2., 0., 0., 0./)
     F(6,:) = (/0., 0., 0., 0., 3., 4., 5., 6., 7./)
     F(7,:) = (/0., 0., 0., 0., 0., 8., 9., 1., 2./)
     F(8,:) = (/0., 0., 0., 0., 0., 3., 4., 5., 6./)
     F(9,:) = (/0., 0., 0., 0., 0., 7., 8., 9., 1./)
     
     
-    E = GatherRow(B)
-    call OneStepGaussElimination(E)
-    C = Unpaking(E)
+    E = GatherRow(F)
     
-    do i = 1, 5
-        print*, C(i,:)        
-    enddo
+!     C = Unpaking(E)
     
 !     do i = 1, 9
-!         do j = 1, 9
-!             if (C(i,j) .ne. 0) then
-!                 NonZero = NonZero + 1
-!             endif
-!         enddo
+!         print*, C(i,:)
 !     enddo
-!     print*
-!     print*, NonZero
+!     print* 
+!     print*, E%Len_Row
 
-!     G = GatherCol(A)
-!     Pivo = MinFillin(G)
+    pivo = MinDeg(E)
+    print*, pivo%row, pivo%col, pivo%Value
+    
+
     contains
 
     !================================================================================================
@@ -71,24 +65,17 @@ program main
         call system("clear")
         n = size(A%Len_Row)
         print*, "Escolha uma estrategia de Pivotamento Local (digite apenas o numero): "
-        print*, "1: Criterio de Markowitz"
-        print*, "2: Grau minimo"
-        print*, "3: Min. row in min. col"
+        print*, "1: Grau minimo"
+        print*, "2: Minimum Fill-in"
         read*, Criterio
         
         if (Criterio .eq. 1) then
             call system("clear")
-            B = PackRowCol(A)
-            Pivo = Markowitz(B)
+            Pivo = MinDeg(A)
             
         elseif (Criterio .eq. 2) then
             call system("clear")
-            Pivo = MinDeg(A)
-        
-        elseif (Criterio .eq. 3) then
-            call system("clear")
-            B = PackRowCol(A)
-            Pivo = MinRowInMinCol(B)
+!             Pivo = MinDeg(A)
         
         else
             print*, "Erro: Digitou uma opcao invalida"
@@ -96,12 +83,6 @@ program main
         endif
         print*, pivo%row , pivo%col, Pivo%Value
         print*
-!         do i = 1, A%Len_Row(Pivo%Row)
-!             if (A%Col_Index(A%Row_Start(Pivo%Row)+i-1) .eq. Pivo%Col) then
-!                 ValPivo = A%Value(A%Row_Start(Pivo%Row)+i-1)
-!                 exit
-!             endif
-!         enddo
                     
         call row_perm_rowpacked(A,1,Pivo%Row)
         call col_perm_rowpacked(A,1,Pivo%Col)
