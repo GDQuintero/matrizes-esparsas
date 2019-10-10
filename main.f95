@@ -8,8 +8,9 @@ program main
     type(ColPacked) :: G
     type(Pivot) :: Pivo
     real, dimension(9) :: w
+    integer, dimension(9) :: p
     integer :: NonZero = 0
-    w = 0.
+    w = 0.; p = (/5, 2, 3, 4, 1, 6, 7, 8, 9/)
     
     A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
     A(2,:) = (/2.d0, 0.d0, -2.d0, 0.d0, 3.d0/)
@@ -44,7 +45,7 @@ program main
 !     print* 
 !     print*, E%Len_Row
 
-    pivo = MinDeg(E)
+    pivo = MinDeg(E,p,5)
     print*, pivo%row, pivo%col, pivo%Value
     
 
@@ -71,7 +72,7 @@ program main
         
         if (Criterio .eq. 1) then
             call system("clear")
-            Pivo = MinDeg(A)
+!             Pivo = MinDeg(A)
             
         elseif (Criterio .eq. 2) then
             call system("clear")
