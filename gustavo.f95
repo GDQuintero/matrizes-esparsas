@@ -26,6 +26,11 @@ module gustavo
         real, allocatable :: Value(:)
     end type 
     
+    type PivotMD
+        integer :: Row, Col, rmin
+        real :: Value
+    end type
+    
     type Pivot
         integer :: Row, Col
         real :: Value
@@ -377,20 +382,40 @@ module gustavo
         
         integer :: i = 0, r_min = 0
         type(RowPacked) :: A
-        type(Pivot) :: MinDeg
+        type(PivotMD) :: MinDeg
         integer :: P(:), ind
         
         !Escojemos la primera fila no ignorada que aparece en el vector P
         r_min = A%Len_Row(P(ind+1))
+        
+        !Verificamos si la primera fila considerada es singleton
+        if (r_min .eq. 1) then
+            MinDeg%Row = P(ind+1)
+            MinDeg%Col = MinDeg%Row
+            MinDeg%Value = A%Value(A%Row_Start(P(ind+1)))
+            MinDeg%rmin = r_min
+            return
+        endif
+        
         MinDeg%Row = P(ind+1)
         MinDeg%Col = MinDeg%Row
+        MinDeg%rmin = r_min
         
         !Buscamos min r_i, y seleccionmos el elemento diagonal como pivote
         do i = ind+2, size(A%Len_Row)
-            if (A%Len_Row(P(i)) .lt. r_min) then
+            !Fila singleton
+            if (A%Len_Row(P(i)) .eq. 1) then
                 r_min = A%Len_Row(P(i))
-                MinDeg%Row = i
+                MinDeg%Row = P(i)
                 MinDeg%Col = MinDeg%Row
+                MinDeg%Value = A%Value(A%Row_Start(P(i)))
+                MinDeg%rmin = r_min
+                return
+            elseif (A%Len_Row(P(i)) .lt. r_min) then
+                r_min = A%Len_Row(P(i))
+                MinDeg%Row = P(i)
+                MinDeg%Col = MinDeg%Row
+                MinDeg%rmin = r_min
             endif
         enddo
         

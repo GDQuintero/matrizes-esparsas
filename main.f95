@@ -6,7 +6,7 @@ program main
     real, dimension(9,9) :: F, C
     type(RowPacked) :: D, E
     type(ColPacked) :: G
-    type(Pivot) :: Pivo
+    type(PivotMD) :: Pivo
     real, dimension(9) :: w
     integer, dimension(9) :: P
     integer :: NonZero = 0
@@ -24,11 +24,11 @@ program main
     B(4,:) = (/-1.d0, 0.d0, 0.d0, -4.d0, 0.d0/)
     B(5,:) = (/5.d0, 3.d0, 0.d0, 0.d0, 6.d0/)
     
-    F(1,:) = (/1., 2., 3., 4., 0., 0., 0., 0., 0./)
+    F(1,:) = (/1., 2., 3., 0., 0., 0., 0., 0., 0./)
     F(2,:) = (/5., 6., 7., 8., 0., 0., 0., 0., 0./)
     F(3,:) = (/9., 1., 2., 3., 0., 0., 0., 0., 0./)
     F(4,:) = (/4., 5., 6., 7., 8., 0., 0., 0., 0./)
-    F(5,:) = (/0., 0., 0., 9., 1., 2., 0., 0., 0./)
+    F(5,:) = (/0., 0., 0., 9., 11., 0., 0., 0., 0./)
     F(6,:) = (/0., 0., 0., 0., 3., 4., 5., 6., 7./)
     F(7,:) = (/0., 0., 0., 0., 0., 8., 9., 1., 2./)
     F(8,:) = (/0., 0., 0., 0., 0., 3., 4., 5., 6./)
@@ -56,7 +56,7 @@ program main
         implicit none
         
         type(RowPacked) :: A
-        type(Pivot) :: Pivo
+        type(PivotMD) :: Pivo
         integer :: P(:), Criterio, i, j, k, n, ind = 0
         integer, allocatable :: tmp(:)
         real :: Mult=1.d0
@@ -69,20 +69,22 @@ program main
         read*, Criterio
         
         if (Criterio .eq. 1) then
-            do i = 1, 1
+            call system("clear")
+            
+            do i = 1, n-1
                 Pivo = MinDeg(A,P,ind)!Calculamos el pivote
                 ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
                 tmp = P
                 P(ind) = Pivo%Row
-                P(Pivo%Row) = tmp(ind)!Hasta aqui solo para guardar la permutacion
                 
-                do j = ind+1, n
-                    do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))
-                        if (A%Col_Index(k) .eq. Pivo%Row) then
-                            print*, j
-                        endif
-                    enddo
+                do j = ind + 1, n
+                    if (P(j) .eq. Pivo%Row) then
+                        P(j) = tmp(ind)
+                        exit!Hasta aqui solo para guardar la permutacion
+                    endif
                 enddo
+                
+                
             enddo           
         else
             call system("clear")
