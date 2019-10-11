@@ -50,7 +50,7 @@ program main
         
         type(RowPacked) :: A
         type(PivotMD) :: Pivo
-        integer :: P(:), Criterio, i, j, k, n, ind = 0
+        integer :: P(:), Criterio, i=0, j=0, k=0, n=0, ind = 0
         integer, allocatable :: tmp(:)
         real :: Mult=1.d0
         
@@ -64,7 +64,7 @@ program main
         if (Criterio .eq. 1) then
             call system("clear")
             
-            do i = 1, n-1
+            do i = 1, 1
                 Pivo = MinDeg(A,P,ind)!Calculamos el pivote
                 ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
                 tmp = P
@@ -77,8 +77,12 @@ program main
                     endif
                 enddo
                 
-                do j = ind + 1, n
-                    
+                do j = ind + 2, n
+                    do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))
+                        if (A%Col_Index(k) .eq. Pivo%Row) then
+                            print*, k
+                        endif
+                    enddo
                 enddo
             enddo           
         else
