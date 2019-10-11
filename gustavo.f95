@@ -383,13 +383,21 @@ module gustavo
         
         integer :: ind1, ind2, i, j, n, m, zeros, k, NonZero
         real :: alpha, w(:)
+        real, allocatable :: aux1(:,:), aux2(:,:)
         type(GustavsonPacked) :: A
         
-        j = A%Len_Row(ind1) + A%Row_Start(ind1)
+        m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(ind1+1)
+        
+        allocate(aux1(2,n))
+        j = A%Len_Row(ind1) + A%Row_Start(ind1); zeros = 0; k = 0; NonZero = 0
+        
+        aux1(1,:) = A%Col_Index(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
+        aux1(2,:) = A%Value(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
+
         do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
             w(A%Col_Index(i)) = A%Value(i)
         enddo
-        
+
         do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
             A%Value(i) = alpha*A%Value(i)
         enddo
@@ -398,6 +406,9 @@ module gustavo
             if (w(A%Col_Index(i)) .ne. 0) then
                 A%Value(i) = A%Value(i) + w(A%Col_Index(i))
                 w(A%Col_Index(i)) = 0.d0
+                if (A%Value(i) .eq. 0) then
+                    zeros = zeros + 1
+                endif
             endif
         enddo
         
@@ -406,10 +417,33 @@ module gustavo
                 A%Col_Index(j) = A%Col_Index(i)
                 A%Value(j) = w(A%Col_Index(i))
                 w(A%Col_Index(i)) = 0.d0
-                j = j + 1
+                j = j + 1; NonZero = NonZero + 1
+                if (A%Value(j) .eq. 0) then
+                    zeros = zeros + 1
+                endif
             endif
         enddo
-
+        
+        A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero - zeros
+        A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero - zeros
+       
+        if (zeros .ne. 0) then
+            allocate(aux2(2,A%Len_Row(ind1)))
+            do i = A%Row_Start(ind1), j-1
+                if (A%Value(i) .ne. 0) then
+                    k = k + 1
+                    aux2(1,k) = A%Col_Index(i)
+                    aux2(2,k) = A%Value(i)
+                endif
+            enddo
+            A%Col_Index(A%Row_Start(ind1):) = aux2(1,:)
+            A%Value(A%Row_Start(ind1):) = aux2(2,:)
+            A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
+            A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
+        endif
+        A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
+        A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
+        
     end subroutine RowSumGusPacked
     !================================================================================================
     ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS (alpha*x + y)
