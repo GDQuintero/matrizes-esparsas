@@ -12,7 +12,7 @@ program main
     integer :: NonZero = 0
     w = 0.; P = (/1, 2, 3, 4, 5, 6, 7, 8, 9/)
     
-    A(1,:) = (/1.d0, 0.d0, -1.d0, -1.d0, 0.d0/)
+    A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
     A(2,:) = (/2.d0, 0.d0, -2.d0, 0.d0, 3.d0/)
     A(3,:) = (/0.d0, -3.d0, 0.d0, 0.d0, 0.d0/)
     A(4,:) = (/0.d0, 4.d0, 0.d0, -4.d0, 0.d0/)
@@ -37,7 +37,7 @@ program main
     
     E = GatherRow(A)
     
-    call RRowSumRowPacked(E,2,1,-2.,w)
+    call RRowSumRowPacked(E,2,1,1.,w)
 !     print*, E%Len_Row
 !     print*, E%Row_Start
 !     print*, E%Col_Index(1:5)
