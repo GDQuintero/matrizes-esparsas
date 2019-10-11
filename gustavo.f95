@@ -36,10 +36,60 @@ module gustavo
         real :: Value
     end type
     
+    type GustavsonPacked
+        integer, allocatable :: Len_Row(:), Len_Col(:), Row_Start(:), Col_Start(:), Row_Index(:), Col_Index(:)
+        real, allocatable :: Value(:)
+    end type
+    
     real :: VectorDensity = 0.25, MatrixDensity = 0.6
     real :: u = 0.25 !PARAMETRO LIMITE (THRESHOLD PIVOTING)
     
     contains
+    !================================================================================================
+    ! FUNCAO PARA EMPACOTAR UMA MATRIZ ESPARSA (FORMATO DE GUSTAVSON)
+    !================================================================================================
+    function GatherGustavson(FullMatrix)
+        implicit none
+        
+        integer :: i, j, k, Density, m, n, NonZero
+        real :: FullMatrix(:,:)
+        type(GustavsonPacked) :: GatherGustavson
+        
+        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:))
+        Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
+        allocate(GatherGustavson%Len_Row(n),GatherGustavson%Len_Col(m))
+        allocate(GatherGustavson%Row_Start(n),GatherGustavson%Col_Start(m))
+        allocate(GatherGustavson%Row_Index(Density),GatherGustavson%Col_Index(Density))
+        allocate(GatherGustavson%Value(Density))
+        
+        do i = 1, m
+            GatherGustavson%Row_Start(i) = k + 1
+            do j = 1,n
+                if (FullMatrix(i,j) .ne. 0) then
+                    k = k + 1
+                    GatherGustavson%Col_Index(k) = j 
+                    GatherGustavson%Value(k) = FullMatrix(i,j)
+                    NonZero = NonZero + 1
+                endif
+            enddo
+            GatherGustavson%Len_Row(i) = NonZero
+            NonZero = 0;
+        enddo
+        k = 0
+        do j = 1, n
+            GatherGustavson%Col_Start(j) = k + 1
+            do i = 1,m
+                if (FullMatrix(i,j) .ne. 0) then
+                    k = k + 1
+                    GatherGustavson%Row_Index(k) = i
+                    NonZero = NonZero + 1
+                endif
+            enddo
+            GatherGustavson%Len_Col(j) = NonZero
+            NonZero = 0;
+        enddo
+        
+    end function GatherGustavson
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UM VETOR ESPARSO 
     !================================================================================================
@@ -80,7 +130,8 @@ module gustavo
         real :: FullMatrix(:,:)
         type(ColPacked) :: GatherCol
         
-        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:)); Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
+        m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:))
+        Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
         allocate(GatherCol%Len_Col(n),GatherCol%Col_Start(n))
         allocate(GatherCol%Row_Index(Density),GatherCol%Value(Density))
         

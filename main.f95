@@ -5,7 +5,7 @@ program main
     real, dimension(5,5) :: A, B
     real, dimension(9,9) :: F, C
     type(RowPacked) :: D, E
-    type(ColPacked) :: G
+    type(GustavsonPacked) :: G
     type(PivotMD) :: Pivo
     real, dimension(9) :: w
     integer, dimension(9) :: P
@@ -35,7 +35,8 @@ program main
     F(9,:) = (/0., 0., 0., 0., 0., 7., 8., 9., 1./)
     
     
-    E = GatherRow(F)
+!     E = GatherRow(F)
+    G = GatherGustavson(A)
     
 !     C = Unpaking(E)
     
@@ -44,7 +45,7 @@ program main
 !     enddo
 !     print* 
 !     print*, E%Len_Row
-    call GaussElimination(E,p)
+!     call GaussElimination(E,p)
     
 
     contains
