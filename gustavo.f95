@@ -310,70 +310,84 @@ module gustavo
     !================================================================================================
     ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS (x + alpha*y)
     !================================================================================================
-    subroutine RRowSumColPacked(A,ind1,ind2,alpha,w)
+    subroutine RRowSumRowPacked(A,indx,indy,alpha,w)
         implicit none
         
-        integer :: ind1, ind2, i, j, n, m, zeros, k, NonZero
+        integer :: indx, indy, i, j, n, m, zeros, k, NonZero
         real :: alpha, w(:)
-        real, allocatable :: aux1(:,:), aux2(:,:)
+        integer, allocatable :: aux11(:), aux21(:)
+        real, allocatable :: aux12(:), aux22(:)
         type(RowPacked) :: A
         
-        m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(ind1+1) 
+        m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(indx+1) 
         
-
-        allocate(aux1(2,n))
-        w = 0.d0; j = A%Len_Row(ind1) + A%Row_Start(ind1); zeros = 0; k = 0; NonZero = 0
-        aux1(1,:) = A%Col_Index(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
-        aux1(2,:) = A%Value(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
-        
-        do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
-            w(A%Col_Index(i)) = A%Value(i)
-        enddo
-        
-        do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
-            if (w(A%Col_Index(i)) .ne. 0) then
-                A%Value(i) = A%Value(i) + alpha*w(A%Col_Index(i))
-                w(A%Col_Index(i)) = 0.d0
-                
-                if (A%Value(i) .eq. 0) then
-                    zeros = zeros + 1
-                endif
-            endif
-        enddo
-        
-        do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
-            if (W(A%Col_Index(i)) .ne. 0) then
-                A%Col_Index(j) = A%Col_Index(i)
-                A%Value(j) = alpha*w(A%Col_Index(i))
-                w(A%Col_Index(i)) = 0.d0
-                j = j + 1; NonZero = NonZero + 1
-                if (A%Value(j) .eq. 0) then
-                    zeros = zeros + 1
-                endif
-            endif
-        enddo
-        
-        A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero - zeros
-        A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero
-       
-        if (zeros .ne. 0) then
-            allocate(aux2(2,A%Len_Row(ind1)+NonZero-zeros))
-            do i = A%Row_Start(ind1), j-1
-                if (A%Value(i) .ne. 0) then
-                    k = k + 1
-                    aux2(1,k) = A%Col_Index(i)
-                    aux2(2,k) = A%Value(i)
+        if (indx .ne. m) then
+            allocate(aux11(n),aux12(n))
+            w = 0.d0; j = A%Len_Row(indx) + A%Row_Start(indx); zeros = 0; k = 0; NonZero = 0
+            
+            aux11 = A%Col_Index(A%Row_Start(indx + 1):A%Row_Start(m) + A%Len_Row(m)-1)
+            aux12 = A%Value(A%Row_Start(indx + 1):A%Row_Start(m) + A%Len_Row(m)-1)
+            
+            do i = A%Row_Start(indy), A%Row_Start(indy) + A%Len_Row(indy) - 1
+                w(A%Col_Index(i)) = A%Value(i)
+            enddo
+            
+            do i = A%Row_Start(indx), A%Row_Start(indx) + A%Len_Row(indx) - 1
+                if (w(A%Col_Index(i)) .ne. 0) then
+                    A%Value(i) = A%Value(i) + alpha*w(A%Col_Index(i))
+                    w(A%Col_Index(i)) = 0.d0
+                    if (A%Value(i) .eq. 0) then
+                        zeros = zeros + 1
+                    endif
                 endif
             enddo
-            A%Col_Index(A%Row_Start(ind1):) = aux2(1,:)
-            A%Value(A%Row_Start(ind1):) = aux2(2,:)
-            A%Col_Index(A%Len_Row(ind1)+1:) = aux1(1,:)
-            A%Value(A%Len_Row(ind1)+1:) = aux1(2,:)
+            
+            do i = A%Row_Start(indy), A%Row_Start(indy) + A%Len_Row(indy) - 1
+                
+                if (w(A%Col_Index(i)) .ne. 0) then
+                    A%Col_Index(j) = A%Col_Index(i)
+                    A%Value(j) = alpha*w(A%Col_Index(i))
+                    w(A%Col_Index(i)) = 0.d0
+                    j = j + 1; NonZero = NonZero + 1
+                    if (A%Value(j) .eq. 0) then
+                        zeros = zeros + 1
+                    endif
+                endif
+            enddo
+           
+!             A%Len_Row(indx) = A%Len_Row(indx) + NonZero - zeros
+!             A%Row_Start(indx + 1:) = A%Row_Start(indx + 1:) + NonZero - zeros
+            
+            if (zeros .ne. 0) then
+                allocate(aux21(A%Len_Row(indx) + NonZero - zeros),aux22(A%Len_Row(indx) + NonZero - zeros))
+                do i = A%Row_Start(indx), j - 1
+                    if (A%Value(i) .ne. 0) then
+                        k = k + 1
+                        aux21(k) = A%Col_Index(i)
+                        aux22(k) = A%Value(i)
+                    endif
+                enddo
+                
+                A%Len_Row(indx) = A%Len_Row(indx) + NonZero - zeros
+                A%Row_Start(indx + 1:) = A%Row_Start(indx + 1:) + NonZero - zeros
+                
+                A%Col_Index(A%Row_Start(indx):) = aux21
+                A%Value(A%Row_Start(indx):) = aux22
+                
+                A%Col_Index(A%Len_Row(indx) + 1:) = aux11
+                A%Value(A%Len_Row(indx) + 1:) = aux12
+                
+                print*, A%Len_Row
+                print*, A%Row_Start
+                print*, A%Col_Index(1:12)
+                print*, A%value(1:12)
+                return
+            endif
+            
+            A%Col_Index(A%Row_Start(indx + 1):) = aux11
+            A%Value(A%Row_Start(indx + 1):) = aux12
         endif
-        
-        A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
-        A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
-    end subroutine RRowSumColPacked
+    end subroutine RRowSumRowPacked
     
     !================================================================================================
     ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA NA FORMA GUSTAVSON (alpha*x + y)

@@ -7,12 +7,12 @@ program main
     type(RowPacked) :: D, E
     type(GustavsonPacked) :: G
     type(PivotMD) :: Pivo
-    real, dimension(6) :: w
+    real, dimension(5) :: w
     integer, dimension(9) :: P
     integer :: NonZero = 0
     w = 0.; P = (/1, 2, 3, 4, 5, 6, 7, 8, 9/)
     
-    A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
+    A(1,:) = (/1.d0, 0.d0, -1.d0, -1.d0, 0.d0/)
     A(2,:) = (/2.d0, 0.d0, -2.d0, 0.d0, 3.d0/)
     A(3,:) = (/0.d0, -3.d0, 0.d0, 0.d0, 0.d0/)
     A(4,:) = (/0.d0, 4.d0, 0.d0, -4.d0, 0.d0/)
@@ -35,9 +35,19 @@ program main
     F(9,:) = (/0., 0., 0., 0., 0., 7., 8., 9., 1./)
     
     
-    E = GatherRow(F)
+    E = GatherRow(A)
     
-    call GaussElimination(E,p)
+    call RRowSumRowPacked(E,2,1,-2.,w)
+!     print*, E%Len_Row
+!     print*, E%Row_Start
+!     print*, E%Col_Index(1:5)
+!     print*, E%Value(1:5)
+    !     C = Unpaking(E)
+!     
+!     do i = 1, 9
+!         print*, C(i,:)
+!     enddo
+!     call GaussElimination(E,p)
     
 
     contains
@@ -76,11 +86,12 @@ program main
                         exit!Hasta aqui solo para guardar la permutacion
                     endif
                 enddo
-                
-                do j = ind + 2, n
-                    do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))
+    
+                do j = ind + 1, n
+                    do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))-1
                         if (A%Col_Index(k) .eq. Pivo%Row) then
-                            print*, k
+                            print*, A%Value(k), P(j)
+!                             Mult = 
                         endif
                     enddo
                 enddo
