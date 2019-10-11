@@ -181,7 +181,7 @@ module gustavo
     end function GatherRow
     
     !================================================================================================
-    ! DESEMPACOTAMENTO
+    ! DESEMPACOTAMENTO (COLECAO DE LINHAS)
     !================================================================================================    
     function Unpaking(X)
         implicit none
@@ -200,6 +200,26 @@ module gustavo
         enddo
                 
     end function Unpaking
+    
+    !================================================================================================
+    ! DESEMPACOTAMENTO (FORMATO GUSTAVSON)
+    !================================================================================================
+    function UnpakinGus(X)
+        implicit none
+        
+        integer :: m, n, NonZero = 0, i, j
+        real, allocatable :: UnpakinGus(:,:)
+        type(GustavsonPacked) :: X
+        
+        n = size(X%Len_Row); m = size(X%Len_Col)
+        allocate(UnpakinGus(m,n))
+        
+        do i = 1, n
+            do j = X%Row_Start(i), X%Row_Start(i) + X%Len_Row(i) - 1
+                UnpakinGus(i,X%Col_Index(j)) = X%Value(j)  
+            enddo
+        enddo
+    end function UnpakinGus
     
     !================================================================================================
     ! EMPACOTAMENTO - FORMA LINHA A FORMA COLUNA
@@ -355,6 +375,42 @@ module gustavo
         A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
     end subroutine RRowSumColPacked
     
+    !================================================================================================
+    ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA NA FORMA GUSTAVSON (alpha*x + y)
+    !================================================================================================
+    subroutine RowSumGusPacked(A,ind1,ind2,alpha,w)
+        implicit none
+        
+        integer :: ind1, ind2, i, j, n, m, zeros, k, NonZero
+        real :: alpha, w(:)
+        type(GustavsonPacked) :: A
+        
+        j = A%Len_Row(ind1) + A%Row_Start(ind1)
+        do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
+            w(A%Col_Index(i)) = A%Value(i)
+        enddo
+        
+        do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
+            A%Value(i) = alpha*A%Value(i)
+        enddo
+        
+        do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
+            if (w(A%Col_Index(i)) .ne. 0) then
+                A%Value(i) = A%Value(i) + w(A%Col_Index(i))
+                w(A%Col_Index(i)) = 0.d0
+            endif
+        enddo
+        
+        do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
+            if (W(A%Col_Index(i)) .ne. 0) then
+                A%Col_Index(j) = A%Col_Index(i)
+                A%Value(j) = w(A%Col_Index(i))
+                w(A%Col_Index(i)) = 0.d0
+                j = j + 1
+            endif
+        enddo
+
+    end subroutine RowSumGusPacked
     !================================================================================================
     ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS (alpha*x + y)
     !================================================================================================

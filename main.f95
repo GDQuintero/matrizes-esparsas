@@ -2,12 +2,12 @@ program main
     use gustavo
     use daniel
     
-    real, dimension(5,5) :: A, B
+    real, dimension(5,5) :: A, B, H
     real, dimension(9,9) :: F, C
     type(RowPacked) :: D, E
     type(GustavsonPacked) :: G
     type(PivotMD) :: Pivo
-    real, dimension(9) :: w
+    real, dimension(6) :: w
     integer, dimension(9) :: P
     integer :: NonZero = 0
     w = 0.; P = (/1, 2, 3, 4, 5, 6, 7, 8, 9/)
@@ -37,14 +37,13 @@ program main
     
 !     E = GatherRow(F)
     G = GatherGustavson(A)
+!     call RowSumGusPacked(G,1,2,1.,w)
     
-!     C = Unpaking(E)
+    H = UnpakinGus(G)
     
-!     do i = 1, 9
-!         print*, C(i,:)
-!     enddo
-!     print* 
-!     print*, E%Len_Row
+    do i = 1, 5
+        print*, H(i,:)
+    enddo
 !     call GaussElimination(E,p)
     
 
