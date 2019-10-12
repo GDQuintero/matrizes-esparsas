@@ -322,7 +322,6 @@ module gustavo
         m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(indx+1) 
         
         if (indx .ne. m) then!Caso donde el resultado de la suma no es almacenado en la ultima fila
-        
             allocate(aux11(n),aux12(n))
             w = 0.d0; j = A%Len_Row(indx) + A%Row_Start(indx); zeros = 0; k = 0; NonZero = 0
             
@@ -353,11 +352,11 @@ module gustavo
                     A%Col_Index(j) = A%Col_Index(i)
                     A%Value(j) = alpha*w(A%Col_Index(i))
                     w(A%Col_Index(i)) = 0.d0
-                    j = j + 1; NonZero = NonZero + 1
-                    
+                       
                     if (A%Value(j) .eq. 0) then
                         zeros = zeros + 1
                     endif
+                    j = j + 1; NonZero = NonZero + 1
                 endif
             enddo
             
@@ -395,7 +394,7 @@ module gustavo
             
         else!Caso donde el resultado de la suma es almacenado en la ultima fila
             
-            w = 0.d0; j = A%Len_Row(indx) + A%Row_Start(indx); zeros = 0; k = 0
+            w = 0.d0; j = A%Len_Row(indx) + A%Row_Start(indx); zeros = 0; k = 0; NonZero = 0
             
             !Desempaquetamos una de las filas
             do i = A%Row_Start(indy), A%Row_Start(indy) + A%Len_Row(indy) - 1
@@ -420,11 +419,11 @@ module gustavo
                     A%Col_Index(j) = A%Col_Index(i)
                     A%Value(j) = alpha*w(A%Col_Index(i))
                     w(A%Col_Index(i)) = 0.d0
-                    j = j + 1
                     
                     if (A%Value(j) .eq. 0) then
                         zeros = zeros + 1
                     endif
+                    j = j + 1; NonZero = NonZero + 1
                 endif
             enddo
             
@@ -438,7 +437,7 @@ module gustavo
                         aux22(k) = A%Value(i)
                     endif
                 enddo
-                
+            
                 A%Len_Row(indx) = A%Len_Row(indx) + NonZero - zeros
                 A%Row_Start(indx + 1:) = A%Row_Start(indx + 1:) + NonZero - zeros
                 
@@ -448,19 +447,13 @@ module gustavo
                 A%Col_Index(A%Row_Start(indx):) = aux21
                 A%Value(A%Row_Start(indx):) = aux22
                 
-                A%Col_Index(A%Row_Start(indx+1):) = aux11
-                A%Value(A%Row_Start(indx+1):) = aux12
-                
                 return
             else
                 A%Len_Row(indx) = A%Len_Row(indx) + NonZero - zeros
                 A%Row_Start(indx + 1:) = A%Row_Start(indx + 1:) + NonZero - zeros
-                
-                A%Col_Index(A%Row_Start(indx + 1):) = aux11
-                A%Value(A%Row_Start(indx + 1):) = aux12
             endif
         endif
-
+        
     end subroutine RRowSumRowPacked
     
     !================================================================================================

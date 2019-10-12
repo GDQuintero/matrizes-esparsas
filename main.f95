@@ -36,17 +36,7 @@ program main
     
     
     E = GatherRow(A)
-    
-    call RRowSumRowPacked(E,5,1,1.,w)
-!     print*, E%Len_Row
-!     print*, E%Row_Start
-!     print*, E%Col_Index(1:5)
-!     print*, E%Value(1:5)
-    !     C = Unpaking(E)
-!     
-!     do i = 1, 9
-!         print*, C(i,:)
-!     enddo
+
 !     call GaussElimination(E,p)
     
 
