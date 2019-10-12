@@ -7,7 +7,7 @@ program main
     type(RowPacked) :: D, E
     type(GustavsonPacked) :: G
     type(PivotMD) :: Pivo
-    real, dimension(5) :: w
+    real, dimension(9) :: w
     integer, dimension(9) :: P
     integer :: NonZero = 0
     w = 0.; P = (/1, 2, 3, 4, 5, 6, 7, 8, 9/)
@@ -35,11 +35,15 @@ program main
     F(9,:) = (/0., 0., 0., 0., 0., 7., 8., 9., 1./)
     
     
-    E = GatherRow(A)
+    E = GatherRow(F)
 
-!     call GaussElimination(E,p)
+    call GaussElimination(E,P)
     
-
+    C = Unpaking(E)
+    
+    do i = 1, 9
+        print*, C(i,:)
+    enddo
     contains
 
     !================================================================================================
@@ -64,7 +68,7 @@ program main
         if (Criterio .eq. 1) then
             call system("clear")
             
-            do i = 1, 1
+            do i = 1, 8
                 Pivo = MinDeg(A,P,ind)!Calculamos el pivote
                 ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
                 tmp = P
@@ -80,8 +84,8 @@ program main
                 do j = ind + 1, n
                     do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))-1
                         if (A%Col_Index(k) .eq. Pivo%Row) then
-                            print*, A%Value(k), P(j)
-!                             Mult = 
+                            Mult = -1.d0*A%Value(k) / Pivo%Value
+                            call RRowSumRowPacked(A,P(j),Pivo%Row,Mult,w)
                         endif
                     enddo
                 enddo
@@ -92,7 +96,7 @@ program main
             return
         endif
         
-
+        print*, P
     end subroutine GaussElimination
     
 end program
