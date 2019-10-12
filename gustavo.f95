@@ -192,15 +192,16 @@ module gustavo
         real, allocatable :: Unpaking(:,:)
         type(RowPacked) :: X
         
-        n = size(X%Len_Row); m = maxval(X%Col_Index)
-        allocate(Unpaking(m,n))
-        Unpaking = 0.
+        n = X%n
+        allocate(Unpaking(n,n))
+        Unpaking = 0.d0
+                
         do i = 1, n
             do j = X%Row_Start(i), X%Row_Start(i) + X%Len_Row(i) - 1
-                Unpaking(i,X%Col_Index(j)) = X%Value(j)  
+                Unpaking(i,X%Col_Index(j)) = X%Value(j) 
             enddo
         enddo
-                
+        
     end function Unpaking
     
     !================================================================================================
@@ -592,7 +593,7 @@ module gustavo
         integer :: n, Density, i, j, k, NonZero
         real, allocatable :: Numbers(:)
         
-        Open(Unit = 10, File = "matriz2.txt", ACCESS = "SEQUENTIAL")
+        Open(Unit = 10, File = "matriz3.txt", ACCESS = "SEQUENTIAL")
         read(10, *) n
         
         A%n = n; A%m = n

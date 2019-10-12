@@ -2,56 +2,33 @@ program main
     use gustavo
     use daniel
     
-    real, dimension(5,5) :: A, B, H
-    real, dimension(9,9) :: F, C
-    type(RowPacked) :: D, E
-    type(GustavsonPacked) :: G
+    type(RowPacked) :: A
     type(PivotMD) :: Pivo
-    real, dimension(9) :: w
-    integer, dimension(9) :: P
+    real, allocatable :: w(:), B(:,:)
+    integer, allocatable :: P(:)
     integer :: NonZero = 0
-    w = 0.; P = (/1, 2, 3, 4, 5, 6, 7, 8, 9/)
     
-    A(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 0.d0/)
-    A(2,:) = (/2.d0, 0.d0, -2.d0, 0.d0, 3.d0/)
-    A(3,:) = (/0.d0, -3.d0, 0.d0, 0.d0, 0.d0/)
-    A(4,:) = (/0.d0, 4.d0, 0.d0, -4.d0, 0.d0/)
-    A(5,:) = (/5.d0, 0.d0, -5.d0, 0.d0, 6.d0/)
+    call ReadMatrix(A)
+    allocate(w(A%n),P(A%n),B(A%n,A%n))
     
-    B(1,:) = (/1.d0, 0.d0, 0.d0, -1.d0, 5.d0/)
-    B(2,:) = (/0.d0, 2.d0, -2.d0, 0.d0, 3.d0/)
-    B(3,:) = (/0.d0, -2.d0, 1.d0, 0.d0, 0.d0/)
-    B(4,:) = (/-1.d0, 0.d0, 0.d0, -4.d0, 0.d0/)
-    B(5,:) = (/5.d0, 3.d0, 0.d0, 0.d0, 6.d0/)
-    
-    F(1,:) = (/1., 2., 3., 4., 0., 0., 0., 0., 0./)
-    F(2,:) = (/5., 6., 7., 8., 0., 0., 0., 0., 0./)
-    F(3,:) = (/9., 1., 2., 3., 0., 0., 0., 0., 0./)
-    F(4,:) = (/4., 5., 6., 7., 8., 0., 0., 0., 0./)
-    F(5,:) = (/0., 0., 0., 9., 1., 2., 0., 0., 0./)
-    F(6,:) = (/0., 0., 0., 0., 3., 4., 5., 6., 7./)
-    F(7,:) = (/0., 0., 0., 0., 0., 8., 9., 1., 2./)
-    F(8,:) = (/0., 0., 0., 0., 0., 3., 4., 5., 6./)
-    F(9,:) = (/0., 0., 0., 0., 0., 7., 8., 9., 1./)
-    
-
-    call ReadMatrix(E)
-    
-!     print*, E%Len_Row
-!     E = GatherRow(F)
-! 
-    call GaussElimination(E,P)
-!     
-    
-    C = Unpaking(E)
-    
-    do i = 1, 9
-        print*, C(i,:)
+    do i = 1, A%n
+        P(i) = i
     enddo
+    
+    call GaussElimination(A,P)
+    
+    B = Unpaking(A)
+    
+    do i = 1, A%n
+        print*, B(i,:)
+    enddo
+    
+    print*
+!     print*, "As permutacoes sao: ", p
     contains
 
     !================================================================================================
-    ! UM PASSO DA ELIMINACAO DE GAUSS USANDO PIVOTAMENTO LOCAL
+    ! ELIMINACAO DE GAUSS USANDO PIVOTAMENTO LOCAL
     !================================================================================================
     subroutine GaussElimination(A,P)
         implicit none
@@ -63,7 +40,7 @@ program main
         real :: Mult=1.d0
         
         call system("clear")
-        n = size(A%Len_Row); allocate(tmp(size(p)))
+        n = A%n; allocate(tmp(size(p)))
         print*, "Escolha uma estrategia de Pivotamento Local (digite apenas o numero): "
         print*, "1: Grau minimo"
         print*, "2: Minimum Fill-in"
@@ -72,7 +49,7 @@ program main
         if (Criterio .eq. 1) then
             call system("clear")
             
-            do i = 1, 8
+            do i = 1, n - 1
                 Pivo = MinDeg(A,P,ind)!Calculamos el pivote
                 ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
                 tmp = P
@@ -100,7 +77,6 @@ program main
             return
         endif
         
-        print*, P
     end subroutine GaussElimination
     
 end program
