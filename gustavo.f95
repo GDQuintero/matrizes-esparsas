@@ -22,6 +22,7 @@ module gustavo
     
     !TYPE QUE EMPACOTA UMA MATRIZ COMO COLECAO DE LINHAS
     type RowPacked
+        integer :: n, m
         integer, allocatable :: Len_Row(:), Row_Start(:), Col_Index(:)
         real, allocatable :: Value(:)
     end type 
@@ -161,13 +162,14 @@ module gustavo
         type(RowPacked) :: GatherRow
         
         m = size(FullMatrix(:,1)); n = size(FullMatrix(1,:))
+        GatherRow%n = n; GatherRow%m = m
         Density = int(m*n*MatrixDensity)+1; NonZero = 0; k = 0
         allocate(GatherRow%Len_Row(n),GatherRow%Row_Start(n))
         allocate(GatherRow%Col_Index(Density),GatherRow%Value(Density))
         
         do i = 1, m
             GatherRow%Row_Start(i) = k + 1
-            do j = 1,n
+            do j = 1, n
                 if (FullMatrix(i,j) .ne. 0) then
                     k = k + 1
                     GatherRow%Col_Index(k) = j 
@@ -192,7 +194,7 @@ module gustavo
         
         n = size(X%Len_Row); m = maxval(X%Col_Index)
         allocate(Unpaking(m,n))
-        
+        Unpaking = 0.
         do i = 1, n
             do j = X%Row_Start(i), X%Row_Start(i) + X%Len_Row(i) - 1
                 Unpaking(i,X%Col_Index(j)) = X%Value(j)  
@@ -580,4 +582,37 @@ module gustavo
         
     end function MinDeg
     
+    !================================================================================================
+    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT
+    !================================================================================================
+    subroutine ReadMatrix(A)
+        implicit none
+        
+        type(RowPacked) :: A
+        integer :: n, Density, i, j, k, NonZero
+        real, allocatable :: Numbers(:)
+        
+        Open(Unit = 10, File = "matriz2.txt", ACCESS = "SEQUENTIAL")
+        read(10, *) n
+        
+        A%n = n; A%m = n
+        Density = int(real(n**2)*MatrixDensity)+1; NonZero = 0; k = 0
+        allocate(Numbers(n),A%Len_Row(n),A%Row_Start(n),A%Col_Index(Density),A%Value(Density))
+        
+        do i = 1, n
+            read(10, *) Numbers
+            A%Row_Start(i) = k + 1
+            do j = 1, n
+                if (abs(Numbers(j)) .gt. 10D-4) then
+                    k = k + 1
+                    A%Col_Index(k) = j 
+                    A%Value(k) = Numbers(j)
+                    NonZero = NonZero + 1
+                endif
+            enddo
+            A%Len_Row(i) = NonZero
+            NonZero = 0
+        enddo
+        close(10)
+    end subroutine ReadMatrix
 end module

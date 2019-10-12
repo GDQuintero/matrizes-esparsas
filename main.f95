@@ -34,10 +34,14 @@ program main
     F(8,:) = (/0., 0., 0., 0., 0., 3., 4., 5., 6./)
     F(9,:) = (/0., 0., 0., 0., 0., 7., 8., 9., 1./)
     
-    
-    E = GatherRow(F)
 
+    call ReadMatrix(E)
+    
+!     print*, E%Len_Row
+!     E = GatherRow(F)
+! 
     call GaussElimination(E,P)
+!     
     
     C = Unpaking(E)
     
