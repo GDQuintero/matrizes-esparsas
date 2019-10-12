@@ -321,17 +321,21 @@ module gustavo
         
         m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(indx+1) 
         
-        if (indx .ne. m) then
+        if (indx .ne. m) then!Caso donde el resultado de la suma no es almacenado en la ultima fila
+        
             allocate(aux11(n),aux12(n))
             w = 0.d0; j = A%Len_Row(indx) + A%Row_Start(indx); zeros = 0; k = 0; NonZero = 0
             
+            !Guardamos las filas abajo de la fila que se modificara
             aux11 = A%Col_Index(A%Row_Start(indx + 1):A%Row_Start(m) + A%Len_Row(m)-1)
             aux12 = A%Value(A%Row_Start(indx + 1):A%Row_Start(m) + A%Len_Row(m)-1)
             
+            !Desempaquetamos una de las filas
             do i = A%Row_Start(indy), A%Row_Start(indy) + A%Len_Row(indy) - 1
                 w(A%Col_Index(i)) = A%Value(i)
             enddo
             
+            !Sumamos elementos que comparten columnas
             do i = A%Row_Start(indx), A%Row_Start(indx) + A%Len_Row(indx) - 1
                 if (w(A%Col_Index(i)) .ne. 0) then
                     A%Value(i) = A%Value(i) + alpha*w(A%Col_Index(i))
@@ -343,8 +347,8 @@ module gustavo
                 endif
             enddo
             
+            !Sumamos elementos restantes
             do i = A%Row_Start(indy), A%Row_Start(indy) + A%Len_Row(indy) - 1
-                
                 if (w(A%Col_Index(i)) .ne. 0) then
                     A%Col_Index(j) = A%Col_Index(i)
                     A%Value(j) = alpha*w(A%Col_Index(i))
@@ -357,6 +361,7 @@ module gustavo
                 endif
             enddo
             
+            !Empujamos a la izquierda si se anulan elementos y a la derecha si surgen nuevas entradas
             if (zeros .ne. 0) then
                 allocate(aux21(A%Len_Row(indx) + NonZero - zeros),aux22(A%Len_Row(indx) + NonZero - zeros))
                 do i = A%Row_Start(indx), j - 1
@@ -380,7 +385,73 @@ module gustavo
                 A%Value(A%Row_Start(indx+1):) = aux12
                 
                 return
+            else
+                A%Len_Row(indx) = A%Len_Row(indx) + NonZero - zeros
+                A%Row_Start(indx + 1:) = A%Row_Start(indx + 1:) + NonZero - zeros
                 
+                A%Col_Index(A%Row_Start(indx + 1):) = aux11
+                A%Value(A%Row_Start(indx + 1):) = aux12
+            endif
+            
+        else!Caso donde el resultado de la suma es almacenado en la ultima fila
+            
+            w = 0.d0; j = A%Len_Row(indx) + A%Row_Start(indx); zeros = 0; k = 0
+            
+            !Desempaquetamos una de las filas
+            do i = A%Row_Start(indy), A%Row_Start(indy) + A%Len_Row(indy) - 1
+                w(A%Col_Index(i)) = A%Value(i)
+            enddo
+            
+            !Sumamos elementos que comparten columnas
+            do i = A%Row_Start(indx), A%Row_Start(indx) + A%Len_Row(indx) - 1
+                if (w(A%Col_Index(i)) .ne. 0) then
+                    A%Value(i) = A%Value(i) + alpha*w(A%Col_Index(i))
+                    w(A%Col_Index(i)) = 0.d0
+                    
+                    if (A%Value(i) .eq. 0) then
+                        zeros = zeros + 1
+                    endif
+                endif
+            enddo
+            
+            !Sumamos elementos restantes
+            do i = A%Row_Start(indy), A%Row_Start(indy) + A%Len_Row(indy) - 1
+                if (w(A%Col_Index(i)) .ne. 0) then
+                    A%Col_Index(j) = A%Col_Index(i)
+                    A%Value(j) = alpha*w(A%Col_Index(i))
+                    w(A%Col_Index(i)) = 0.d0
+                    j = j + 1
+                    
+                    if (A%Value(j) .eq. 0) then
+                        zeros = zeros + 1
+                    endif
+                endif
+            enddo
+            
+            !En este caso solo empujamos a la izquierda si se anulan elementos
+            if (zeros .ne. 0) then
+                allocate(aux21(A%Len_Row(indx) + NonZero - zeros),aux22(A%Len_Row(indx) + NonZero - zeros))
+                do i = A%Row_Start(indx), j - 1
+                    if (A%Value(i) .ne. 0) then
+                        k = k + 1
+                        aux21(k) = A%Col_Index(i)
+                        aux22(k) = A%Value(i)
+                    endif
+                enddo
+                
+                A%Len_Row(indx) = A%Len_Row(indx) + NonZero - zeros
+                A%Row_Start(indx + 1:) = A%Row_Start(indx + 1:) + NonZero - zeros
+                
+                A%Col_Index(A%Row_Start(indx):) = 0
+                A%Value(A%Row_Start(indx):) = 0.d0
+                
+                A%Col_Index(A%Row_Start(indx):) = aux21
+                A%Value(A%Row_Start(indx):) = aux22
+                
+                A%Col_Index(A%Row_Start(indx+1):) = aux11
+                A%Value(A%Row_Start(indx+1):) = aux12
+                
+                return
             else
                 A%Len_Row(indx) = A%Len_Row(indx) + NonZero - zeros
                 A%Row_Start(indx + 1:) = A%Row_Start(indx + 1:) + NonZero - zeros

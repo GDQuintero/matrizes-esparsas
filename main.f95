@@ -37,7 +37,7 @@ program main
     
     E = GatherRow(A)
     
-    call RRowSumRowPacked(E,2,1,1.,w)
+    call RRowSumRowPacked(E,5,1,1.,w)
 !     print*, E%Len_Row
 !     print*, E%Row_Start
 !     print*, E%Col_Index(1:5)
