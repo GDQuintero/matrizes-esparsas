@@ -528,92 +528,72 @@ module gustavo
         A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
         A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
     end subroutine RowSumRowPacked
-    
     !================================================================================================
-    ! CRITERIO DE GRADO MINIMO
-    !================================================================================================
-    function MinDeg(A,P,ind)
+    ! PRODUTO INTERNO DE DOIS VETORES DENSOS
+    !================================================================================================ 
+    function ProdVect(x,y)
         implicit none
         
-        integer :: i = 0, r_min = 0
-        type(RowPacked) :: A
-        type(PivotMD) :: MinDeg
-        integer :: P(:), ind
+        integer :: i, n
+        real :: x(:), y(:), ProdVect
         
-        !Escojemos la primera fila no ignorada que aparece en el vector P
-        r_min = A%Len_Row(P(ind+1))
-        
-        !Verificamos si la primera fila considerada es singleton
-        if (r_min .eq. 1) then
-            MinDeg%Row = P(ind+1)
-            MinDeg%Col = MinDeg%Row
-            MinDeg%Value = A%Value(A%Row_Start(P(ind+1)))
-            MinDeg%rmin = r_min
-            return
-        endif
-        
-        MinDeg%Row = P(ind+1)
-        MinDeg%Col = MinDeg%Row
-        MinDeg%rmin = r_min
-        
-        !Buscamos min r_i, y seleccionmos el elemento diagonal como pivote
-        do i = ind+2, size(A%Len_Row)
-            !Fila singleton
-            if (A%Len_Row(P(i)) .eq. 1) then
-                r_min = A%Len_Row(P(i))
-                MinDeg%Row = P(i)
-                MinDeg%Col = MinDeg%Row
-                MinDeg%Value = A%Value(A%Row_Start(P(i)))
-                MinDeg%rmin = r_min
-                return
-            elseif (A%Len_Row(P(i)) .lt. r_min) then
-                r_min = A%Len_Row(P(i))
-                MinDeg%Row = P(i)
-                MinDeg%Col = MinDeg%Row
-                MinDeg%rmin = r_min
-            endif
-        enddo
-        
-        !Buscamos el valor del pivote
-        do i = 1, r_min
-            if (A%Col_Index(A%Row_Start(MinDeg%Row)+i-1) .eq. MinDeg%Row) then
-                MinDeg%Value = A%Value(A%Row_Start(MinDeg%Row)+i-1)
-            endif
-        enddo
-        
-    end function MinDeg
-    
-    !================================================================================================
-    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT
-    !================================================================================================
-    subroutine ReadMatrix(A)
-        implicit none
-        
-        type(RowPacked) :: A
-        integer :: n, Density, i, j, k, NonZero
-        real, allocatable :: Numbers(:)
-        
-        Open(Unit = 10, File = "matriz3.txt", ACCESS = "SEQUENTIAL")
-        read(10, *) n
-        
-        A%n = n; A%m = n
-        Density = int(real(n**2)*MatrixDensity)+1; NonZero = 0; k = 0
-        allocate(Numbers(n),A%Len_Row(n),A%Row_Start(n),A%Col_Index(Density),A%Value(Density))
+        n = size(x) 
+        ProdVect = 0.d0
         
         do i = 1, n
-            read(10, *) Numbers
-            A%Row_Start(i) = k + 1
-            do j = 1, n
-                if (abs(Numbers(j)) .gt. 10D-4) then
-                    k = k + 1
-                    A%Col_Index(k) = j 
-                    A%Value(k) = Numbers(j)
-                    NonZero = NonZero + 1
-                endif
-            enddo
-            A%Len_Row(i) = NonZero
-            NonZero = 0
+            ProdVect = ProdVect + x(i)*y(i)
         enddo
-        close(10)
-    end subroutine ReadMatrix
+        
+    end function ProdVect
+    
+    !================================================================================================
+    ! PRODUTO DE DUAS MATRIZES DENSAS
+    !================================================================================================   
+    function ProdMat(A,B)
+        implicit none
+        
+        integer :: i, j, n
+        real :: A(:,:), B(:,:)
+        real, allocatable :: ProdMat(:,:)
+        
+        n = size(A(1,:)); allocate(ProdMat(n,n))
+        
+        do i = 1, n
+            do j = 1, n
+                ProdMat(i,j) = ProdVect(A(i,:),B(:,j))
+            enddo
+        enddo
+
+    end function ProdMat
+    
+    !================================================================================================
+    ! FUNCAO PARA CRIAR UM VETOR CANONICO
+    !================================================================================================ 
+    function Canon(ind,n)
+        implicit none
+    
+        integer :: ind, n
+        real, allocatable :: Canon(:)
+        
+        allocate(Canon(n)); Canon = 0.d0; Canon(ind) = 1.d0
+        
+    end function Canon
+        
+    !================================================================================================
+    ! FUNCAO PARA CRIAR A MATRIZ DE PERMUTACAO
+    !================================================================================================ 
+    function PerMat(P)
+    implicit none
+    
+    integer :: i, n, P(:)
+    real, allocatable :: PerMat(:,:)
+    
+    n = size(P); allocate(PerMat(n,n))
+    
+    do i = 1, n
+        PerMat(i,:) = Canon(P(i),n)
+    enddo
+    
+    end function PerMat
+    
 end module
