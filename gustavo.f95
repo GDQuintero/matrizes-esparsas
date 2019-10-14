@@ -585,15 +585,56 @@ module gustavo
     function PerMat(P)
     implicit none
     
-    integer :: i, n, P(:)
+    integer :: j, n, P(:)
     real, allocatable :: PerMat(:,:)
     
     n = size(P); allocate(PerMat(n,n))
     
-    do i = 1, n
-        PerMat(i,:) = Canon(P(i),n)
+    do j = 1, n
+        PerMat(:,j) = Canon(P(j),n)
     enddo
     
     end function PerMat
     
+    !================================================================================================
+    ! FUNCAO PARA IMPRIMIR O PADRAO DE PREENCHIMENTO DE UMA MATRIZ
+    !================================================================================================ 
+    function Pattern(A,n)
+        implicit none
+        
+        real :: A(:,:)
+        character(len=3), allocatable :: Pattern(:,:)
+        integer :: i, j, n
+        
+        allocate(Pattern(n,n))
+        Pattern = "   "
+        do i = 1, n
+            do j = 1, n
+                if(abs(A(i,j)) .ge. 10e-4) then
+                    Pattern(i,j) = " x "
+                else
+                    Pattern(i,j) = "   "
+                endif
+            enddo
+        enddo
+        
+        do i = 1, n
+            print*, "|", Pattern(i,:), "|"
+        enddo
+    end function Pattern
+    
+    !================================================================================================
+    ! FUNCAO PARA IMPRIMIR UMA MATRIZ
+    !================================================================================================ 
+    subroutine PrintMat(A,n)
+        implicit none
+        
+        real :: A(:,:)
+        integer :: i, n
+        
+        do i = 1, n
+            print*, A(i,:)
+        enddo
+    end subroutine PrintMat
+
 end module

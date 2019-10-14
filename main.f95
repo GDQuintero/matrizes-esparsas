@@ -5,8 +5,8 @@ program main
     type(RowPacked) :: A
     type(PivotMD) :: Pivo
     real, allocatable :: w(:), B(:,:), per(:,:), C(:,:), D(:,:)
+    character(len=3), allocatable :: E(:,:)
     integer, allocatable :: P(:)
-    integer :: NonZero = 0
     
     call ReadMatrix(A)
     allocate(w(A%n),P(A%n),B(A%n,A%n),per(A%n,A%n),C(A%n,A%n),D(A%n,A%n))
@@ -18,12 +18,13 @@ program main
     call GaussElimination(A,P)
     B = Unpaking(A)
     per = PerMat(P)
-    C = ProdMat(per,B); D = ProdMat(C,per)
+    C = ProdMat(transpose(per),B); D = ProdMat(C,per)
     
-    do i = 1, A%n
-        print*, D(i,:)
-    enddo
- 
+    call PrintMat(D,A%n)
+    print*
+!     E = Pattern(D,A%n)
+    
+!     print*, p
     contains
     
     !================================================================================================
@@ -90,7 +91,7 @@ program main
         integer :: n, Density, i, j, k, NonZero
         real, allocatable :: Numbers(:)
         
-        Open(Unit = 10, File = "matriz3.txt", ACCESS = "SEQUENTIAL")
+        Open(Unit = 10, File = "matriz2.txt", ACCESS = "SEQUENTIAL")
         read(10, *) n
         
         A%n = n; A%m = n
@@ -128,41 +129,32 @@ program main
         
         call system("clear")
         n = A%n; allocate(tmp(size(p)))
-        print*, "Escolha uma estrategia de Pivotamento Local (digite apenas o numero): "
-        print*, "1: Grau minimo"
-        print*, "2: Minimum Fill-in"
-        read*, Criterio
         
-        if (Criterio .eq. 1) then
-            call system("clear")
+        call system("clear")
+        
+        do i = 1, n - 1
+            Pivo = MinDeg(A,P,ind)!Calculamos el pivote
+            ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
+            tmp = P
+            P(ind) = Pivo%Row
             
-            do i = 1, n - 1
-                Pivo = MinDeg(A,P,ind)!Calculamos el pivote
-                ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
-                tmp = P
-                P(ind) = Pivo%Row
-                
-                do j = ind + 1, n
-                    if (P(j) .eq. Pivo%Row) then
-                        P(j) = tmp(ind)
-                        exit!Hasta aqui solo para guardar la permutacion
+            do j = ind + 1, n
+                if (P(j) .eq. Pivo%Row) then
+                    P(j) = tmp(ind)
+                    exit!Hasta aqui solo para guardar la permutacion
+                endif
+            enddo
+
+            do j = ind + 1, n
+                do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))-1
+                    if (A%Col_Index(k) .eq. Pivo%Row) then
+                        Mult = -1.d0*A%Value(k) / Pivo%Value
+                        call RRowSumRowPacked(A,P(j),Pivo%Row,Mult,w)
                     endif
                 enddo
-    
-                do j = ind + 1, n
-                    do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))-1
-                        if (A%Col_Index(k) .eq. Pivo%Row) then
-                            Mult = -1.d0*A%Value(k) / Pivo%Value
-                            call RRowSumRowPacked(A,P(j),Pivo%Row,Mult,w)
-                        endif
-                    enddo
-                enddo
-            enddo           
-        else
-            call system("clear")
-            print*, "Ainda nao foi implementado!!!"
-            return
-        endif
+            enddo
+        enddo           
+        
         
     end subroutine GaussElimination
     
