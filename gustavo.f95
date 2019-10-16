@@ -638,45 +638,23 @@ module gustavo
     end subroutine PrintMat
     
     !================================================================================================
-    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT NO ESQUEMA DE COORDENADAS
-    !================================================================================================
-    subroutine ReadMatCoord(A)
+    ! FUNCAO PARA EXPORTAR UMA MATRIZ EMPACOTADA EM UM ARQUIVO .DAT
+    !================================================================================================ 
+    subroutine Export(A,n)
         implicit none
         
         type(RowPacked) :: A
-        integer :: n, Density, i, indi, indj, tau
-        integer, allocatable :: aux(:)
-        real :: val
+        integer :: i, n, j
         
-        Open(Unit = 10, File = "bcsstm07.txt", ACCESS = "SEQUENTIAL")
-        read(10, *) n, tau
-        
-        Density = int(real(n*n)*MatrixDensity)+1
-        allocate(aux(n),A%Len_Row(n),A%Row_Start(n),A%Col_Index(Density),A%Value(Density))
-        
-        A%Len_Row = 0; A%n = n
-        
-        do i = 1, tau
-            read(10,*) indi, indj, val
-            A%Len_Row(indi) = A%Len_Row(indi) + 1
-        enddo
-        close(10); Open(Unit = 10, File = "bcsstm07.txt", ACCESS = "SEQUENTIAL")
-        read(10, *) n, tau
-        
-        A%Row_Start(1) = 1; aux(1) = 1
- 
-        do i = 2, n
-            A%Row_Start(i) = A%Row_Start(i-1) + A%Len_Row(i-1)
-            aux(i) = A%Row_Start(i)
-        enddo
-
-        do i = 1, tau
-            read(10,*) indi, indj, val
-            A%Col_Index(aux(indi)) = indj
-            A%Value(aux(indi)) = Val
-            aux(indi) = aux(indi) + 1
+        Open(Unit = 10, File = "dados.txt", ACCESS = "SEQUENTIAL")
+    
+        do i = 1, n
+            do j = A%Row_Start(i), A%Row_Start(i) + A%Len_Row(i) - 1
+                write(10,*) i, j, A%Value(j)
+            enddo
         enddo
         
         close(10)
-    end subroutine ReadMatCoord
+    end subroutine
+    
 end module

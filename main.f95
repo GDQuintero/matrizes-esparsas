@@ -8,7 +8,7 @@ program main
     character(len=3), allocatable :: E(:,:)
     integer, allocatable :: P(:)
     
-    call ReadMatCoord(A)
+    call ReadMatrix(A)
     allocate(w(A%n),P(A%n),B(A%n,A%n),per(A%n,A%n),C(A%n,A%n),D(A%n,A%n))
     
     do i = 1, A%n
@@ -16,11 +16,13 @@ program main
     enddo
     
     call GaussElimination(A,P)
+    call Export(A,A%n)
     B = Unpaking(A)
     per = PerMat(P)
     C = ProdMat(transpose(per),B); D = ProdMat(C,per)
+    
 !     
-    call PrintMat(D,A%n)
+!     call PrintMat(D,A%n)
 !     print*
 !     E = Pattern(D,A%n)
     
@@ -82,40 +84,6 @@ program main
     end function MinDeg
     
     !================================================================================================
-    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT
-    !================================================================================================
-    subroutine ReadMatrix(A)
-        implicit none
-        
-        type(RowPacked) :: A
-        integer :: n, Density, i, j, k, NonZero
-        real, allocatable :: Numbers(:)
-        
-        Open(Unit = 10, File = "matriz2.txt", ACCESS = "SEQUENTIAL")
-        read(10, *) n
-        
-        A%n = n; A%m = n
-        Density = int(real(n**2)*MatrixDensity)+1; NonZero = 0; k = 0
-        allocate(Numbers(n),A%Len_Row(n),A%Row_Start(n),A%Col_Index(Density),A%Value(Density))
-        
-        do i = 1, n
-            read(10, *) Numbers
-            A%Row_Start(i) = k + 1
-            do j = 1, n
-                if (abs(Numbers(j)) .gt. 10D-4) then
-                    k = k + 1
-                    A%Col_Index(k) = j 
-                    A%Value(k) = Numbers(j)
-                    NonZero = NonZero + 1
-                endif
-            enddo
-            A%Len_Row(i) = NonZero
-            NonZero = 0
-        enddo
-        close(10)
-    end subroutine ReadMatrix
-    
-    !================================================================================================
     ! ELIMINACAO DE GAUSS USANDO PIVOTAMENTO LOCAL
     !================================================================================================
     subroutine GaussElimination(A,P)
@@ -158,4 +126,80 @@ program main
         
     end subroutine GaussElimination
     
+    !================================================================================================
+    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT
+    !================================================================================================
+    subroutine ReadMatrix(A)
+        implicit none
+        
+        type(RowPacked) :: A
+        integer :: n, Density, i, j, k, NonZero
+        real, allocatable :: Numbers(:)
+        
+        Open(Unit = 10, File = "matriz2.txt", ACCESS = "SEQUENTIAL")
+        read(10, *) n
+        
+        A%n = n; A%m = n
+        Density = int(real(n**2)*MatrixDensity)+1; NonZero = 0; k = 0
+        allocate(Numbers(n),A%Len_Row(n),A%Row_Start(n),A%Col_Index(Density),A%Value(Density))
+        
+        do i = 1, n
+            read(10, *) Numbers
+            A%Row_Start(i) = k + 1
+            do j = 1, n
+                if (abs(Numbers(j)) .gt. 10D-4) then
+                    k = k + 1
+                    A%Col_Index(k) = j 
+                    A%Value(k) = Numbers(j)
+                    NonZero = NonZero + 1
+                endif
+            enddo
+            A%Len_Row(i) = NonZero
+            NonZero = 0
+        enddo
+        close(10)
+    end subroutine ReadMatrix
+    
+    !================================================================================================
+    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT NO ESQUEMA DE COORDENADAS
+    !================================================================================================
+    subroutine ReadMatCoord(A)
+        implicit none
+        
+        type(RowPacked) :: A
+        integer :: n, Density, i, indi, indj, tau
+        integer, allocatable :: aux(:)
+        real :: val
+        
+        Open(Unit = 10, File = "bcsstm07.txt", ACCESS = "SEQUENTIAL")
+        read(10, *) n, tau
+        
+        Density = int(real(n*n)*MatrixDensity)+1
+        allocate(aux(n),A%Len_Row(n),A%Row_Start(n),A%Col_Index(Density),A%Value(Density))
+        
+        A%Len_Row = 0; A%n = n
+        
+        do i = 1, tau
+            read(10,*) indi, indj, val
+            A%Len_Row(indi) = A%Len_Row(indi) + 1
+        enddo
+        close(10); Open(Unit = 10, File = "bcsstm07.txt", ACCESS = "SEQUENTIAL")
+        read(10, *) n, tau
+        
+        A%Row_Start(1) = 1; aux(1) = 1
+ 
+        do i = 2, n
+            A%Row_Start(i) = A%Row_Start(i-1) + A%Len_Row(i-1)
+            aux(i) = A%Row_Start(i)
+        enddo
+
+        do i = 1, tau
+            read(10,*) indi, indj, val
+            A%Col_Index(aux(indi)) = indj
+            A%Value(aux(indi)) = Val
+            aux(indi) = aux(indi) + 1
+        enddo
+        
+        close(10)
+    end subroutine ReadMatCoord
 end program
