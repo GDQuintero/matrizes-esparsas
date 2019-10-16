@@ -8,7 +8,7 @@ program main
     character(len=3), allocatable :: E(:,:)
     integer, allocatable :: P(:)
     
-    call ReadMatrix(A)
+    call ReadMatCoord(A)
     allocate(w(A%n),P(A%n),B(A%n,A%n),per(A%n,A%n),C(A%n,A%n),D(A%n,A%n))
     
     do i = 1, A%n
@@ -19,9 +19,9 @@ program main
     B = Unpaking(A)
     per = PerMat(P)
     C = ProdMat(transpose(per),B); D = ProdMat(C,per)
-    
+!     
     call PrintMat(D,A%n)
-    print*
+!     print*
 !     E = Pattern(D,A%n)
     
 !     print*, p
@@ -127,10 +127,10 @@ program main
         integer, allocatable :: tmp(:)
         real :: Mult=1.d0
         
-        call system("clear")
+!         call system("clear")
         n = A%n; allocate(tmp(size(p)))
         
-        call system("clear")
+!         call system("clear")
         
         do i = 1, n - 1
             Pivo = MinDeg(A,P,ind)!Calculamos el pivote
