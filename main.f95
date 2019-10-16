@@ -18,10 +18,7 @@ program main
     B = Unpaking(A)
     per = PerMat(P)
     C = ProdMat(per,B); D = ProdMat(C,transpose(per))
-    
     call Export(D,A%n)
-    
-!     
 !     call PrintMat(D,A%n)
     E = Pattern(D,A%n)
     print*
@@ -85,37 +82,33 @@ program main
     end function MinDeg
     
     !================================================================================================
-    ! ELIMINACAO DE GAUSS USANDO PIVOTAMENTO LOCAL
+    ! ELIMINACAO DE GAUSS USANDO GRAU MINIMO
     !================================================================================================
     subroutine GaussElimination(A,P)
         implicit none
         
         type(RowPacked) :: A
         type(PivotMD) :: Pivo
-        integer :: P(:), Criterio, i=0, j=0, k=0, n=0, ind = 0
+        integer :: P(:), Criterio, i=0, j=0, k=0, n=0
         integer, allocatable :: tmp(:)
         real :: Mult=1.d0
         
-!         call system("clear")
         n = A%n; allocate(tmp(size(p)))
         
-!         call system("clear")
-        
         do i = 1, n-1
-            Pivo = MinDeg(A,P,ind)!Calculamos el pivote
-            ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
+            Pivo = MinDeg(A,P,i-1)!Calculamos el pivote
             tmp = P
-            P(ind) = Pivo%Row
+            P(i) = Pivo%Row
         
-            do j = ind + 1, n
+            do j = i + 1, n
                 if (P(j) .eq. Pivo%Row) then
-                    P(j) = tmp(ind)
+                    P(j) = tmp(i)
                     exit!Hasta aqui solo para guardar la permutacion
                 endif
             enddo
 
-            do j = ind + 1, n
-                do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j))-1
+            do j = i + 1, n
+                do k = A%Row_Start(P(j)), A%Row_Start(P(j)) + A%Len_Row(P(j)) - 1
                     if (A%Col_Index(k) .eq. Pivo%Row) then
                         Mult = -1.d0*A%Value(k) / Pivo%Value
                         call RRowSumRowPacked(A,P(j),Pivo%Row,Mult,w)
