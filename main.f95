@@ -1,6 +1,5 @@
 program main
     use gustavo
-    use daniel
     
     type(RowPacked) :: A
     type(PivotMD) :: Pivo
@@ -16,17 +15,19 @@ program main
     enddo
     
     call GaussElimination(A,P)
-    call Export(A,A%n)
     B = Unpaking(A)
     per = PerMat(P)
-    C = ProdMat(transpose(per),B); D = ProdMat(C,per)
+    C = ProdMat(per,B); D = ProdMat(C,transpose(per))
+    
+    call Export(D,A%n)
     
 !     
 !     call PrintMat(D,A%n)
-!     print*
-!     E = Pattern(D,A%n)
-    
-!     print*, p
+    E = Pattern(D,A%n)
+    print*
+    print*, "O vetor de permutacoes é:"
+    print*
+    print*, p
     contains
     
     !================================================================================================
@@ -100,12 +101,12 @@ program main
         
 !         call system("clear")
         
-        do i = 1, n - 1
+        do i = 1, n-1
             Pivo = MinDeg(A,P,ind)!Calculamos el pivote
             ind = ind + 1!Indice para ignorar la fila de los pivotes elegidos
             tmp = P
             P(ind) = Pivo%Row
-            
+        
             do j = ind + 1, n
                 if (P(j) .eq. Pivo%Row) then
                     P(j) = tmp(ind)
@@ -136,7 +137,7 @@ program main
         integer :: n, Density, i, j, k, NonZero
         real, allocatable :: Numbers(:)
         
-        Open(Unit = 10, File = "matriz2.txt", ACCESS = "SEQUENTIAL")
+        Open(Unit = 10, File = "teste3.txt", ACCESS = "SEQUENTIAL")
         read(10, *) n
         
         A%n = n; A%m = n
@@ -160,46 +161,4 @@ program main
         close(10)
     end subroutine ReadMatrix
     
-    !================================================================================================
-    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT NO ESQUEMA DE COORDENADAS
-    !================================================================================================
-    subroutine ReadMatCoord(A)
-        implicit none
-        
-        type(RowPacked) :: A
-        integer :: n, Density, i, indi, indj, tau
-        integer, allocatable :: aux(:)
-        real :: val
-        
-        Open(Unit = 10, File = "bcsstm07.txt", ACCESS = "SEQUENTIAL")
-        read(10, *) n, tau
-        
-        Density = int(real(n*n)*MatrixDensity)+1
-        allocate(aux(n),A%Len_Row(n),A%Row_Start(n),A%Col_Index(Density),A%Value(Density))
-        
-        A%Len_Row = 0; A%n = n
-        
-        do i = 1, tau
-            read(10,*) indi, indj, val
-            A%Len_Row(indi) = A%Len_Row(indi) + 1
-        enddo
-        close(10); Open(Unit = 10, File = "bcsstm07.txt", ACCESS = "SEQUENTIAL")
-        read(10, *) n, tau
-        
-        A%Row_Start(1) = 1; aux(1) = 1
- 
-        do i = 2, n
-            A%Row_Start(i) = A%Row_Start(i-1) + A%Len_Row(i-1)
-            aux(i) = A%Row_Start(i)
-        enddo
-
-        do i = 1, tau
-            read(10,*) indi, indj, val
-            A%Col_Index(aux(indi)) = indj
-            A%Value(aux(indi)) = Val
-            aux(indi) = aux(indi) + 1
-        enddo
-        
-        close(10)
-    end subroutine ReadMatCoord
 end program

@@ -460,75 +460,6 @@ module gustavo
     end subroutine RRowSumRowPacked
     
     !================================================================================================
-    ! SOMA DE DUAS LINHAS DE UMA MATRIZ EMPACOTADA COMO COLECAO DE LINHAS 
-    !================================================================================================
-    
-    subroutine RowSumRowPacked(A,ind1,ind2,alpha,w)
-        implicit none
-        
-        integer :: ind1, ind2, i, j, n, m, zeros, k, NonZero
-        real :: alpha, w(:)
-        real, allocatable :: aux1(:,:), aux2(:,:)
-        type(RowPacked) :: A
-        
-        m = size(A%Len_Row); n = A%Row_Start(m) + A%Len_Row(m) - A%Row_Start(ind1+1) 
-        
-        allocate(aux1(2,n))
-        j = A%Len_Row(ind1) + A%Row_Start(ind1); zeros = 0; k = 0; NonZero = 0
-        aux1(1,:) = A%Col_Index(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
-        aux1(2,:) = A%Value(A%Row_Start(ind1+1):A%Row_Start(m)+A%Len_Row(m)-1)
-        
-        do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
-            w(A%Col_Index(i)) = A%Value(i)
-        enddo
-
-        do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
-            A%Value(i) = alpha*A%Value(i)
-        enddo
-        
-        do i = A%Row_Start(ind1), A%Row_Start(ind1) + A%Len_Row(ind1) - 1
-            if (w(A%Col_Index(i)) .ne. 0) then
-                A%Value(i) = A%Value(i) + w(A%Col_Index(i))
-                w(A%Col_Index(i)) = 0.d0
-                if (A%Value(i) .eq. 0) then
-                    zeros = zeros + 1
-                endif
-            endif
-        enddo
-        
-        do i = A%Row_Start(ind2), A%Row_Start(ind2) + A%Len_Row(ind2) - 1
-            if (W(A%Col_Index(i)) .ne. 0) then
-                A%Col_Index(j) = A%Col_Index(i)
-                A%Value(j) = w(A%Col_Index(i))
-                w(A%Col_Index(i)) = 0.d0
-                j = j + 1; NonZero = NonZero + 1
-                if (A%Value(j) .eq. 0) then
-                    zeros = zeros + 1
-                endif
-            endif
-        enddo
-        
-        A%Len_Row(ind1) = A%Len_Row(ind1) + NonZero - zeros
-        A%Row_Start(ind1+1:) = A%Row_Start(ind1+1:) + NonZero - zeros
-       
-        if (zeros .ne. 0) then
-            allocate(aux2(2,A%Len_Row(ind1)))
-            do i = A%Row_Start(ind1), j-1
-                if (A%Value(i) .ne. 0) then
-                    k = k + 1
-                    aux2(1,k) = A%Col_Index(i)
-                    aux2(2,k) = A%Value(i)
-                endif
-            enddo
-            A%Col_Index(A%Row_Start(ind1):) = aux2(1,:)
-            A%Value(A%Row_Start(ind1):) = aux2(2,:)
-            A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
-            A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
-        endif
-        A%Col_Index(A%Row_Start(ind1+1):) = aux1(1,:)
-        A%Value(A%Row_Start(ind1+1):) = aux1(2,:)
-    end subroutine RowSumRowPacked
-    !================================================================================================
     ! PRODUTO INTERNO DE DOIS VETORES DENSOS
     !================================================================================================ 
     function ProdVect(x,y)
@@ -585,13 +516,13 @@ module gustavo
     function PerMat(P)
     implicit none
     
-    integer :: j, n, P(:)
+    integer :: i, j, n, P(:)
     real, allocatable :: PerMat(:,:)
     
     n = size(P); allocate(PerMat(n,n))
     
-    do j = 1, n
-        PerMat(:,j) = Canon(P(j),n)
+    do i = 1, n
+        PerMat(i,:) = Canon(P(i),n)
     enddo
     
     end function PerMat
@@ -643,18 +574,61 @@ module gustavo
     subroutine Export(A,n)
         implicit none
         
-        type(RowPacked) :: A
+        real :: A(:,:)
         integer :: i, n, j
         
-        Open(Unit = 10, File = "dados.txt", ACCESS = "SEQUENTIAL")
+        Open(Unit = 10, File = "dados.dat", ACCESS = "SEQUENTIAL")
     
         do i = 1, n
-            do j = A%Row_Start(i), A%Row_Start(i) + A%Len_Row(i) - 1
-                write(10,*) i, j, A%Value(j)
+            do j = 1, n
+                write(10,*) i, j, A(i,j)
             enddo
         enddo
         
         close(10)
     end subroutine
     
+    !================================================================================================
+    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT NO ESQUEMA DE COORDENADAS
+    !================================================================================================
+    subroutine ReadMatCoord(A)
+        implicit none
+        
+        type(RowPacked) :: A
+        integer :: n, Density, i, indi, indj, tau
+        integer, allocatable :: aux(:)
+        real :: val
+        
+        Open(Unit = 10, File = "bcsstk01.txt", ACCESS = "SEQUENTIAL")
+        read(10, *) n, tau
+        
+        Density = int(real(n*n)*MatrixDensity)+1
+        allocate(aux(n),A%Len_Row(n),A%Row_Start(n),A%Col_Index(Density),A%Value(Density))
+        
+        A%Len_Row = 0; A%n = n
+        
+        do i = 1, tau
+            read(10,*) indi, indj, val
+            A%Len_Row(indi) = A%Len_Row(indi) + 1
+        enddo
+        
+        close(10); Open(Unit = 10, File = "bcsstk01.txt", ACCESS = "SEQUENTIAL")
+        read(10, *) n, tau
+        
+        A%Row_Start(1) = 1; aux(1) = 1
+ 
+        do i = 2, n
+            A%Row_Start(i) = A%Row_Start(i-1) + A%Len_Row(i-1)
+            aux(i) = A%Row_Start(i)
+        enddo
+
+        do i = 1, tau
+            read(10,*) indi, indj, val
+            A%Col_Index(aux(indi)) = indj
+            A%Value(aux(indi)) = Val
+            aux(indi) = aux(indi) + 1
+        enddo
+        
+        close(10)
+    end subroutine ReadMatCoord
 end module
