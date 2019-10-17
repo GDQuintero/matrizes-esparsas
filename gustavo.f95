@@ -646,9 +646,9 @@ module gustavo
         Open(Unit = 10, File = "bcsstk01.txt", ACCESS = "SEQUENTIAL")
         read(10, *) n, tau
         
-        allocate(A%Row_Index(tau),A%Col_Index(tau),%Value(tau))
+        allocate(A%Row_Index(tau),A%Col_Index(tau),A%Value(tau))
         
-        A%n = n
+        A%nnz = n
         
         do i = 1, tau
             read(10,*) indi, indj, val
@@ -658,6 +658,6 @@ module gustavo
         enddo
         
         close(10)
-    end subroutine ReadMatCoord
+    end subroutine ReadMatCoord2
     
 end module
