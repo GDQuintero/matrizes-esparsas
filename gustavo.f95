@@ -631,4 +631,33 @@ module gustavo
         
         close(10)
     end subroutine ReadMatCoord
+    
+        !================================================================================================
+    ! FUNCAO PARA LER UMA MATRIZ EM UM ARQUIVO .TXT NO ESQUEMA DE COORDENADAS
+    !================================================================================================
+    subroutine ReadMatCoord2(A)
+        implicit none
+        
+        type(CoordPacked) :: A
+        integer :: n, Density, i, indi, indj, tau
+        integer, allocatable :: aux(:)
+        real :: val
+        
+        Open(Unit = 10, File = "bcsstk01.txt", ACCESS = "SEQUENTIAL")
+        read(10, *) n, tau
+        
+        allocate(A%Row_Index(tau),A%Col_Index(tau),%Value(tau))
+        
+        A%n = n
+        
+        do i = 1, tau
+            read(10,*) indi, indj, val
+            A%Value = val
+            A%Row_Index = indi
+            A%Col_Index = indj
+        enddo
+        
+        close(10)
+    end subroutine ReadMatCoord
+    
 end module
