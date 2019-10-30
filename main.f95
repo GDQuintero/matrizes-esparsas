@@ -22,7 +22,7 @@ program main
 !     call PrintMat(D,A%n)
     E = Pattern(D,A%n)
     print*
-    print*, "O vetor de permutacoes é:"
+    print*, "O vetor de permutacoes é dado por:"
     print*
     print*, p
     contains
