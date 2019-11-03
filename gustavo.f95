@@ -41,8 +41,9 @@ module gustavo
 
     !ESTRUTURA TIPO GUSTAVSON
     type GustavsonPacked
+        integer :: n, nz
         integer, allocatable :: Len_Row(:), Len_Col(:), Row_Start(:), Col_Start(:), Row_Index(:), Col_Index(:)
-        real, allocatable :: Value(:)
+        real(kind=8), allocatable :: Value(:)
     end type
     
     real :: VectorDensity = 0.25, MatrixDensity = 0.5
