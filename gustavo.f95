@@ -27,16 +27,19 @@ module gustavo
         real, allocatable :: Value(:)
     end type 
     
+    !TYPE PIVO PARA GRAU MINIMO
     type PivotMD
         integer :: Row, Col, rmin
         real :: Value
     end type
     
+    !TYPE PIVO
     type Pivot
         integer :: Row, Col
         real :: Value
     end type
-    
+
+    !ESTRUTURA TIPO GUSTAVSON
     type GustavsonPacked
         integer, allocatable :: Len_Row(:), Len_Col(:), Row_Start(:), Col_Start(:), Row_Index(:), Col_Index(:)
         real, allocatable :: Value(:)
@@ -46,8 +49,9 @@ module gustavo
     real :: u = 0.25 !PARAMETRO LIMITE (THRESHOLD PIVOTING)
     
     contains
+
     !================================================================================================
-    ! FUNCAO PARA EMPACOTAR UMA MATRIZ ESPARSA (FORMATO DE GUSTAVSON)
+    ! FUNCAO PARA EMPACOTAR UMA MATRIZ ESPARSA (FORMATO GUSTAVSON)
     !================================================================================================
     function GatherGustavson(FullMatrix)
         implicit none
@@ -91,6 +95,27 @@ module gustavo
         enddo
         
     end function GatherGustavson
+
+    !================================================================================================
+    ! DESEMPACOTAMENTO (FORMATO GUSTAVSON)
+    !================================================================================================
+    function UnpakinGus(X)
+        implicit none
+        
+        integer :: m, n, NonZero = 0, i, j
+        real, allocatable :: UnpakinGus(:,:)
+        type(GustavsonPacked) :: X
+        
+        n = size(X%Len_Row); m = size(X%Len_Col)
+        allocate(UnpakinGus(m,n))
+        
+        do i = 1, n
+            do j = X%Row_Start(i), X%Row_Start(i) + X%Len_Row(i) - 1
+                UnpakinGus(i,X%Col_Index(j)) = X%Value(j)  
+            enddo
+        enddo
+    end function UnpakinGus
+
     !================================================================================================
     ! FUNCAO PARA EMPACOTAR UM VETOR ESPARSO 
     !================================================================================================
@@ -203,26 +228,6 @@ module gustavo
         enddo
         
     end function Unpaking
-    
-    !================================================================================================
-    ! DESEMPACOTAMENTO (FORMATO GUSTAVSON)
-    !================================================================================================
-    function UnpakinGus(X)
-        implicit none
-        
-        integer :: m, n, NonZero = 0, i, j
-        real, allocatable :: UnpakinGus(:,:)
-        type(GustavsonPacked) :: X
-        
-        n = size(X%Len_Row); m = size(X%Len_Col)
-        allocate(UnpakinGus(m,n))
-        
-        do i = 1, n
-            do j = X%Row_Start(i), X%Row_Start(i) + X%Len_Row(i) - 1
-                UnpakinGus(i,X%Col_Index(j)) = X%Value(j)  
-            enddo
-        enddo
-    end function UnpakinGus
     
     !================================================================================================
     ! EMPACOTAMENTO - FORMA LINHA A FORMA COLUNA

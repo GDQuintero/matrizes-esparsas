@@ -5,26 +5,8 @@ program main
     type(PivotMD) :: Pivo
     real, allocatable :: w(:), B(:,:), per(:,:), C(:,:), D(:,:)
     character(len=3), allocatable :: E(:,:)
-    integer, allocatable :: P(:)
+    integer, allocatable :: P(:) 
     
-    call ReadMatrix(A)
-    allocate(w(A%n),P(A%n),B(A%n,A%n),per(A%n,A%n),C(A%n,A%n),D(A%n,A%n))
-    
-    do i = 1, A%n
-        P(i) = i
-    enddo
-    
-    call GaussElimination(A,P)
-    B = Unpaking(A)
-    per = PerMat(P)
-    C = ProdMat(per,B); D = ProdMat(C,transpose(per))
-    call Export(D,A%n)
-!     call PrintMat(D,A%n)
-    E = Pattern(D,A%n)
-    print*
-    print*, "O vetor de permutacoes é dado por:"
-    print*
-    print*, p
     contains
     
     !================================================================================================
