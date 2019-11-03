@@ -130,7 +130,7 @@ program main
         integer :: n, Density, i, j, k, NonZero
         real, allocatable :: Numbers(:)
         
-        Open(Unit = 10, File = "teste3.txt", ACCESS = "SEQUENTIAL")
+        Open(Unit = 10, File = "teste2.txt", ACCESS = "SEQUENTIAL")
         read(10, *) n
         
         A%n = n; A%m = n
