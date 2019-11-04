@@ -46,7 +46,7 @@ module gustavo
         real(kind=8), allocatable :: Value(:)
     end type
     
-    real :: VectorDensity = 0.25, MatrixDensity = 0.5
+    real :: VectorDensity = 0.25, MatrixDensity = 0.6
     real :: u = 0.25 !PARAMETRO LIMITE (THRESHOLD PIVOTING)
     
     contains

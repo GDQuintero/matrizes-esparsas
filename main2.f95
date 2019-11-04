@@ -9,7 +9,7 @@ program main2
 	contains
 
 	!================================================================================================
-    ! LEER UNA MATRIZ DENSA Y ALMACENARLA EN EL FORMATO GUSTAVSON - ORDEM n*tau
+    ! LEER UNA MATRIZ DENSA Y ALMACENARLA EN EL FORMATO GUSTAVSON - ORDEM N*TAU
     !================================================================================================
     subroutine ReadMatGus(A)
     	implicit none
@@ -19,7 +19,7 @@ program main2
         real(kind=8), allocatable :: Numbers(:), aux(:,:)
         real(kind=8) :: tol = 10d-4
         
-        Open(Unit = 10, File = "dense1.txt", ACCESS = "SEQUENTIAL")
+        Open(Unit = 10, File = "dense2.txt", ACCESS = "SEQUENTIAL")
         read(10, *) n, nz
 
         A%n = n; A%nz = nz; Col_nz = 0; Row_nz = 0
