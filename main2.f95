@@ -1,20 +1,20 @@
 program main2
-	use gustavo
-	implicit none
+    use gustavo
+    implicit none
 
-	type(GustavsonPacked) :: A
+    type(GustavsonPacked) :: A
 
-	call ReadMatGus(A)
-
+    call ReadMatGus(A)
+    print*, A%Len_Row
 	contains
 
-	!================================================================================================
+    !================================================================================================
     ! LEER UNA MATRIZ DENSA Y ALMACENARLA EN EL FORMATO GUSTAVSON - ORDEM N*TAU
     !================================================================================================
     subroutine ReadMatGus(A)
     	implicit none
 
-    	type(GustavsonPacked) :: A
+        type(GustavsonPacked) :: A
         integer :: n, nz, Density, i, j, rk, ck, Col_nz, Row_nz
         real(kind=8), allocatable :: Numbers(:), aux(:,:)
         real(kind=8) :: tol = 10d-4
@@ -35,10 +35,10 @@ program main2
           
             do j = 1, n
                 if (abs(Numbers(j)) .gt. tol) then
-                	aux(i,j) = Numbers(j)
+                    aux(i,j) = Numbers(j)
                     rk = rk + 1
                     A%Col_Index(rk) = j 
-                   	Row_nz = Row_nz + 1
+                    Row_nz = Row_nz + 1
                 endif
             enddo
             A%Len_Row(i) = Row_nz
@@ -46,18 +46,18 @@ program main2
         enddo
 
         do j = 1, n
-        	A%Col_Start(j) = ck + 1
-        	
+            A%Col_Start(j) = ck + 1
+            
         	do i = 1, n
         		if (abs(aux(i,j)) .gt. tol) then
-        			ck = ck + 1
-        			A%Row_Index(ck) = i
-        			A%Value(ck) = aux(i,j)
-        			Col_nz = Col_nz + 1
+                    ck = ck + 1
+                    A%Row_Index(ck) = i
+                    A%Value(ck) = aux(i,j)
+                    Col_nz = Col_nz + 1
         		endif
         	enddo
-        	A%Len_Col(j) = Col_nz
-        	Col_nz = 0
+            A%Len_Col(j) = Col_nz
+            Col_nz = 0
         enddo
         close(10)
 
